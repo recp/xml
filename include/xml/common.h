@@ -8,8 +8,6 @@
 #ifndef xml_common_h
 #define xml_common_h
 
-#define _USE_MATH_DEFINES /* for windows */
-
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -28,11 +26,13 @@
 
 #define XML_ARR_LEN(ARR) (sizeof(ARR)/sizeof(ARR[0]))
 
+struct xml_t;
+struct xml_attr_t;
+
 typedef enum xml_type_t {
   XML_UNKOWN  = 0,
-  XML_OBJECT  = 1,
-  XML_ARRAY   = 2,
-  XML_STRING  = 3,
+  XML_ELEMENT = 1,
+  XML_STRING  = 2
 
   /*
   XML_BOOL    = 5,
@@ -44,14 +44,24 @@ typedef enum xml_type_t {
    */
 } xml_type_t;
 
+typedef struct xml_attr_t {
+  struct xml_t      *parent;
+  struct xml_attr_t *next;
+  const char        *name;
+  void              *value;
+  int                valSize;
+  int                nameSize;
+} xml_attr_t;
+
 typedef struct xml_t {
-  struct xml_t *parent;
-  struct xml_t *next;
-  const char   *key;
-  void         *value;
-  int           valSize;
-  int           keySize;
-  xml_type_t    type;
+  struct xml_t      *parent;
+  struct xml_t      *next;
+  struct xml_attr_t *attribs;
+  const char        *tag;
+  void              *child;
+  int                childsize;
+  int                tagsize;
+  xml_type_t         type;
 } xml_t;
 
 typedef struct xml_array_t {
