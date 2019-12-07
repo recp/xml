@@ -45,29 +45,26 @@ typedef enum xml_type_t {
 } xml_type_t;
 
 typedef struct xml_attr_t {
-  struct xml_t      *parent;
   struct xml_attr_t *next;
   const char        *name;
-  void              *value;
-  int                valSize;
-  int                nameSize;
+  const char        *val;
+  uint16_t           valsize;
+  uint16_t           namesize;
+  uint8_t            namequote;
+  uint8_t            valquote;
 } xml_attr_t;
 
 typedef struct xml_t {
   struct xml_t      *parent;
   struct xml_t      *next;
-  struct xml_attr_t *attribs;
+  struct xml_attr_t *attr;
+  const char        *xmlns;
   const char        *tag;
-  void              *child;
-  int                childsize;
+  struct xml_t      *val;
+  int                valsize;
   int                tagsize;
   xml_type_t         type;
 } xml_t;
-
-typedef struct xml_array_t {
-  xml_t base;
-  int   count;
-} xml_array_t;
 
 typedef struct xml_doc_t {
   void       *memroot;
