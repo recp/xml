@@ -61,8 +61,8 @@ typedef struct xml_t {
   const char        *xmlns;
   const char        *tag;
   struct xml_t      *val;
-  int                valsize;
-  int                tagsize;
+  uint32_t           valsize;
+  uint32_t           tagsize;
   xml_type_t         type;
 } xml_t;
 

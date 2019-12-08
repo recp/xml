@@ -23,7 +23,7 @@ XML_EXPORT
 xml_doc_t*
 xml_parse(const char * __restrict contents, bool reverse) {
   xml_doc_t   *doc;
-  xml_t       *obj, *val, *parent;
+  xml_t       *obj, *parent;
   xml_attr_t  *attr;
   const char  *tag, *p, *end;
   xml_t        tmproot;
@@ -64,9 +64,6 @@ xml_parse(const char * __restrict contents, bool reverse) {
       case '\t':
         break;
       case '<': {
-        if (pos == endel)
-          break;
-
         if (pos == begintag)
           goto err;
 
@@ -77,7 +74,7 @@ xml_parse(const char * __restrict contents, bool reverse) {
 //        pos = endel;
       case '>':
 
-        if (pos == endtag || pos == beginattr) {
+        if (pos == endta) {
           /* switch parent back */
           if (!parent)
             goto err;
