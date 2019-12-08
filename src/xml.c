@@ -70,10 +70,38 @@ xml_parse(const char * __restrict contents, bool reverse) {
         pos = begintag;
         break;
       }
-//      case '/':
-//        pos = endel;
-      case '>':
+      case '/':
+        switch (pos) {
+          case begintag:
+            /* end xml etag */
+            
+            tag = obj->tag;
+            c   = *++p;
+            
+            do {
+              if (c == '\0')
+                goto err;
+              
+              if (c != *tag++)
+                goto err;
+              
+              c = *++p;
+            } while (c != ' ' && c != '>');
+            
+            p--;
+            
+            pos = endtag;
+            break;
+          case beginel:
+          case beginattr:
+            pos = endtag;
+            break;
+          default:
+            break;
+        }
 
+        break;
+      case '>':
         if (pos == endtag) {
           /* switch parent back */
           if (!parent)
@@ -87,77 +115,53 @@ xml_parse(const char * __restrict contents, bool reverse) {
           obj              = parent;
           parent           = parent->parent;
           pos              = endel;
-        } else {
-//          p++; /* skip extra > */
         }
      
         break;
       default: {
         switch (pos) {
           case begintag:
-            if (c != '/') {
-              /* switch parent */
-              parent    = obj;
-              obj       = xml__impl_calloc(doc, sizeof(xml_t));
-              obj->type = XML_ELEMENT;
-              
-              /* parent must not be NULL */
-              
-              if (!reverse) {
-                if (!parent->next)
-                  parent->next = obj;
-                else
-                  xml_xml(parent)->next = obj;
-              } else {
-                obj->next = parent->val;
-              }
-              
-              parent->val = obj;
-              obj->parent = parent;
-              obj->tag = p;
-              
-              do {
-                if (c == '\0')
-                  goto err;
-                
-                c = *++p;
-              } while (c != ' ' && c != '>');
-              
-              obj->tagsize = (int)(p - obj->tag);
-              
-              if (c == '>')
-                pos = beginel;
+            /* switch parent */
+            parent    = obj;
+            obj       = xml__impl_calloc(doc, sizeof(xml_t));
+            obj->type = XML_ELEMENT;
+            
+            /* parent must not be NULL */
+            
+            if (!reverse) {
+              if (!parent->next)
+                parent->next = obj;
               else
-                pos = beginattr;
-
-              /*
-               TODO: obly opens if error is handled
-               if (c  == '\0')
-               goto err;
-               */
-              
-              p--;
-              
+                xml_xml(parent)->next = obj;
             } else {
-               /* end xml etag */
-              
-              tag = obj->tag;
-              c   = *++p;
-              
-              do {
-                if (c == '\0')
-                  goto err;
-                
-                if (c != *tag++)
-                  goto err;
-                
-                c = *++p;
-              } while (c != ' ' && c != '>');
-              
-              p--;
-              
-              pos = endtag;
+              obj->next = parent->val;
             }
+            
+            parent->val = obj;
+            obj->parent = parent;
+            obj->tag = p;
+            
+            do {
+              if (c == '\0')
+                goto err;
+              
+              c = *++p;
+            } while (c != ' ' && c != '>');
+            
+            obj->tagsize = (int)(p - obj->tag);
+            
+            if (c == '>')
+              pos = beginel;
+            else
+              pos = beginattr;
+            
+            /*
+             TODO: obly opens if error is handled
+             if (c  == '\0')
+             goto err;
+             */
+            
+            p--;
             break;
           case beginattr:
             attr = xml__impl_calloc(doc, sizeof(xml_t));
@@ -199,9 +203,6 @@ xml_parse(const char * __restrict contents, bool reverse) {
                 
                 c = *++p;
               }
-              
-              /* skip trailing column */
-              /* c = *++p; */ 
             }
             
             attr->namesize = (int)(end - attr->name);
@@ -249,7 +250,7 @@ xml_parse(const char * __restrict contents, bool reverse) {
               /* c = *++p; */
               ++p;
             } else {
-              while (c != '>') {
+              while (c != '>' && c != '/') {
                 if (c == '\0')
                   goto err;
                 
