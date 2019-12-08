@@ -33,8 +33,8 @@
  *  4. free XML document with xml_free()
  *  5. free `contents`
  *
- * @param[in] contents XML string
- * @param[in] reverse  store members, array items as reverse order
+ * @param[in] contents          XML string
+ * @param[in] reverse           store members, array items as reverse order
  * @param[in] separatePrefixes  separate prefixes and store them in xml->prefix
  * @return xml document which contains xml object as root object
  */
@@ -53,5 +53,6 @@ xml_free(xml_doc_t * __restrict jsondoc);
 
 #include "impl/impl_parse.h"
 #include "impl/impl_common.h"
+#include "objmap.h"
 
 #endif /* xml_h */
