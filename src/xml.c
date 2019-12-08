@@ -114,6 +114,8 @@ xml_parse(const char * __restrict contents, bool reverse) {
           obj              = parent;
           parent           = parent->parent;
           pos              = endel;
+        } else {
+          pos = beginel;
         }
      
         break;
@@ -267,7 +269,8 @@ xml_parse(const char * __restrict contents, bool reverse) {
             attr->next = obj->attr;
             obj->attr  = attr;
             attr       = NULL;
-
+            s          = p + 1;
+            
             goto again;
           case beginel:
           case endel:
