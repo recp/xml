@@ -21,11 +21,13 @@ typedef enum xml_position {
 
 XML_EXPORT
 xml_doc_t*
-xml_parse(const char * __restrict contents, bool reverse) {
+xml_parse(const char * __restrict contents,
+          bool                    reverse,
+          bool                    separatePrefixes) {
   xml_doc_t   *doc;
   xml_t       *obj, *parent, *val;
   xml_attr_t  *attr;
-  const char  *tag, *p, *end, *s;
+  const char  *tag, *p, *end, *s, *ns;
   xml_t        tmproot;
   xml_position pos;
   char         c, quote;
@@ -140,12 +142,20 @@ xml_parse(const char * __restrict contents, bool reverse) {
             
             parent->val = obj;
             obj->parent = parent;
-            obj->tag = p;
-            
+            obj->tag    = p;
+
             do {
               if (c == '\0')
                 goto err;
               
+              if (separatePrefixes) {
+                if (c == ':') {
+                  obj->prefix     = obj->tag;
+                  obj->prefixsize = (p - obj->prefix);
+                  obj->tag        = p + 1;
+                }
+              }
+
               c = *++p;
             } while (c != ' ' && c != '>');
             

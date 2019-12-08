@@ -39,7 +39,9 @@
  */
 XML_EXPORT
 xml_doc_t*
-xml_parse(const char * __restrict contents, bool reverse);
+xml_parse(const char * __restrict contents,
+          bool                    reverse,
+          bool                    separatePrefixes);
 
 /*!
  * @brief frees xml document and its allocated memory

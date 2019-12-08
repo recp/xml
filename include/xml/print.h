@@ -41,7 +41,14 @@ xml_print_ex(FILE  * __restrict ostream,
 
     switch (xml->type) {
       case XML_ELEMENT: {
-        fprintf(ostream, "<%.*s", xml->tagsize, xml->tag);
+        if (!xml->prefix)
+          fprintf(ostream, "<%.*s", xml->tagsize, xml->tag);
+        else
+          fprintf(ostream, "<%.*s:%.*s",
+                  xml->prefixsize,
+                  xml->prefix,
+                  xml->tagsize,
+                  xml->tag);
 
         if ((a = xml->attr)) {
           do {
@@ -72,8 +79,16 @@ xml_print_ex(FILE  * __restrict ostream,
         } else {
           if (xml->parent)
             fprintf(ostream, " />");
-          else
-            fprintf(ostream, "></%.*s>", xml->tagsize, xml->tag);
+          else {
+            if (!xml->prefix)
+              fprintf(ostream, "></%.*s>", xml->tagsize, xml->tag);
+            else
+              fprintf(ostream, "></%.*s:%.*s>",
+                      xml->prefixsize,
+                      xml->prefix,
+                      xml->tagsize,
+                      xml->tag);
+          }
           
           if (opt > 0)
             fprintf(ostream, "\n");
@@ -98,8 +113,16 @@ xml_print_ex(FILE  * __restrict ostream,
             fprintf(ostream, "\t");
         }
 
-        if (parent->type == XML_ELEMENT)
-          fprintf(ostream, "</%.*s>", parent->tagsize, parent->tag);
+        if (parent->type == XML_ELEMENT) {
+          if (!parent->prefix)
+            fprintf(ostream, "</%.*s>", parent->tagsize, parent->tag);
+          else
+            fprintf(ostream, "</%.*s:%.*s>",
+                    parent->prefixsize,
+                    parent->prefix,
+                    parent->tagsize,
+                    parent->tag);
+        }
 
         if (opt > 0)
           fprintf(ostream, "\n");
