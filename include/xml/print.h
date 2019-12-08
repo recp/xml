@@ -34,7 +34,7 @@ xml_print_ex(FILE  * __restrict ostream,
   parent = NULL;
 
   while (xml) {
-    if (opt > 0) {
+    if (opt > 0 && xml->type == XML_ELEMENT) {
       for (i = 0; i < pad; i++)
         fprintf(ostream, "\t");
     }
@@ -66,7 +66,7 @@ xml_print_ex(FILE  * __restrict ostream,
           /* parent = xml; */
           xml = xml->val;
           
-          if (opt > 0)
+          if (opt > 0 && xml->type == XML_ELEMENT)
             fprintf(ostream, "\n");
           continue;
         } else {
@@ -82,9 +82,6 @@ xml_print_ex(FILE  * __restrict ostream,
       }
       case XML_STRING:
         fprintf(ostream, "%.*s", xml->valsize, xml_string(xml));
-
-        if (opt > 0)
-          fprintf(ostream, "\n");
         break;
       default:
         break;
@@ -94,10 +91,10 @@ xml_print_ex(FILE  * __restrict ostream,
       xml = xml->next;
     } else if ((parent = xml->parent)) {
       do {
-        --pad;
+        
 
         if (opt > 0) {
-          for (i = 0; i < pad; i++)
+          for (i = 0; i < pad - 1; i++)
             fprintf(ostream, "\t");
         }
 
@@ -109,6 +106,9 @@ xml_print_ex(FILE  * __restrict ostream,
 
         xml    = parent->next;
         parent = parent->parent;
+        
+        if (!xml)
+          --pad;
       } while (!xml && parent);
     } else {
       break;

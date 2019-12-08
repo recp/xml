@@ -73,8 +73,7 @@ xml_parse(const char * __restrict contents, bool reverse) {
       case '/':
         switch (pos) {
           case begintag:
-            /* end xml etag */
-            
+            /* end xml tag */
             tag = obj->tag;
             c   = *++p;
             
@@ -88,8 +87,8 @@ xml_parse(const char * __restrict contents, bool reverse) {
               c = *++p;
             } while (c != ' ' && c != '>');
             
+            s = p + 1;
             p--;
-            
             pos = endtag;
             break;
           case beginel:
@@ -271,6 +270,7 @@ xml_parse(const char * __restrict contents, bool reverse) {
 
             goto again;
           case beginel:
+          case endel:
             val       = xml__impl_calloc(doc, sizeof(xml_t));
             val->type = XML_STRING;
             
@@ -296,6 +296,7 @@ xml_parse(const char * __restrict contents, bool reverse) {
             }
             
             val->valsize = (int)(p - (char *)s);
+            p--;
             break;
           default:
             break;
