@@ -77,6 +77,9 @@ xml_print_ex(FILE  * __restrict ostream,
             fprintf(ostream, "\n");
           continue;
         } else {
+          if (!xml->next)
+            pad--;
+
           if (xml->parent)
             fprintf(ostream, " />");
           else {
@@ -106,10 +109,8 @@ xml_print_ex(FILE  * __restrict ostream,
       xml = xml->next;
     } else if ((parent = xml->parent)) {
       do {
-        
-
-        if (opt > 0) {
-          for (i = 0; i < pad - 1; i++)
+        if (opt > 0 && (!xml || (xml && xml->type == XML_ELEMENT))) {
+          for (i = 0; i < pad; i++)
             fprintf(ostream, "\t");
         }
 
