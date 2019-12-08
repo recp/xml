@@ -16,6 +16,18 @@
  * @brief return xml object from value
  */
 XML_INLINE
+xml_type_t
+xml_valtype(const xml_t * __restrict object) {
+  if (object->val == NULL)
+    return 0;
+  
+  return ((xml_t *)object->val)->type;
+}
+
+/*!
+ * @brief return xml object from value
+ */
+XML_INLINE
 xml_t*
 xml_xml(const xml_t * __restrict object) {
   return (xml_t *)object->val;

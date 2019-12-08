@@ -59,9 +59,8 @@ typedef struct xml_t {
   struct xml_t      *next;
   struct xml_attr_t *attr;
   const char        *prefix;
-  const char        *xmlns;
   const char        *tag;
-  struct xml_t      *val;
+  void              *val;
   uint32_t           valsize;
   uint32_t           tagsize;
   uint32_t           prefixsize;
