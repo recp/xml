@@ -52,9 +52,6 @@ xml_parse(const char * __restrict contents,
   quote          = '"';
 
   ((xml_mem_t *)doc->memroot)->capacity = XML_MEM_PAGE;
-
-  /* TODO: */
-  /* skip XML header e.g. version line */
   
   do {
   again:
@@ -73,6 +70,20 @@ xml_parse(const char * __restrict contents,
         pos = begintag;
         break;
       }
+      case '?':
+        /* skip XML header e.g. version line */
+        if (pos == begintag) {
+          /* skip to value  */
+          while (c != '>') {
+            if (c == '\0')
+              goto err;
+            c = *++p;
+          }
+
+          ++p;
+          pos = 0;
+        }
+        break;
       case '/':
         switch (pos) {
           case begintag:
