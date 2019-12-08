@@ -60,7 +60,8 @@ xml_print_ex(FILE  * __restrict ostream,
         if (xml->val) {
           fprintf(ostream, ">");
 
-          pad++;
+          if (xml->val->type == XML_ELEMENT)
+            pad++;
 
           /* parent = xml; */
           xml = xml->val;
@@ -80,10 +81,7 @@ xml_print_ex(FILE  * __restrict ostream,
         break;
       }
       case XML_STRING:
-        fprintf(ostream, "\"%.*s\"", xml->valsize, xml_string(xml));
-
-        if (xml->next)
-          fprintf(ostream, ",");
+        fprintf(ostream, "%.*s", xml->valsize, xml_string(xml));
 
         if (opt > 0)
           fprintf(ostream, "\n");

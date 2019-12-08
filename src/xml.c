@@ -23,9 +23,9 @@ XML_EXPORT
 xml_doc_t*
 xml_parse(const char * __restrict contents, bool reverse) {
   xml_doc_t   *doc;
-  xml_t       *obj, *parent;
+  xml_t       *obj, *parent, *val;
   xml_attr_t  *attr;
-  const char  *tag, *p, *end;
+  const char  *tag, *p, *end, *s;
   xml_t        tmproot;
   xml_position pos;
   char         c, quote;
@@ -161,6 +161,7 @@ xml_parse(const char * __restrict contents, bool reverse) {
              goto err;
              */
             
+            s = p + 1;
             p--;
             break;
           case beginattr:
@@ -269,6 +270,33 @@ xml_parse(const char * __restrict contents, bool reverse) {
             attr       = NULL;
 
             goto again;
+          case beginel:
+            val       = xml__impl_calloc(doc, sizeof(xml_t));
+            val->type = XML_STRING;
+            
+            /* parent must not be NULL */
+
+            if (!reverse) {
+              if (!obj->next)
+                obj->next = val;
+               else
+                xml_xml(obj)->next = val;
+            } else {
+              val->next = obj->val;
+            }
+
+            obj->val    = val;
+            val->parent = obj;
+            val->val    = s;
+
+            while (c != '<') {
+              if (c == '\0')
+                goto err;
+              c = *++p;
+            }
+            
+            val->valsize = (int)(p - (char *)s);
+            break;
           default:
             break;
         }
