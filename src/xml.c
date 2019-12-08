@@ -27,7 +27,7 @@ xml_parse(const char * __restrict contents,
   xml_doc_t   *doc;
   xml_t       *obj, *parent, *val;
   xml_attr_t  *attr;
-  const char  *tag, *p, *end, *s, *ns;
+  const char  *tag, *p, *end, *s;
   xml_t        tmproot;
   xml_position pos;
   char         c, quote;
@@ -43,6 +43,7 @@ xml_parse(const char * __restrict contents,
   memset(&tmproot, 0, sizeof(tmproot));
   tmproot.type   = XML_ELEMENT;
 
+  s              = NULL;
   attr           = NULL;
   tag            = NULL;
   parent         = &tmproot;
@@ -83,7 +84,7 @@ xml_parse(const char * __restrict contents,
               if (c == '\0')
                 goto err;
               
-              if (c != *tag++)
+              if (!tag || c != *tag++)
                 goto err;
               
               c = *++p;
@@ -151,7 +152,7 @@ xml_parse(const char * __restrict contents,
               if (separatePrefixes) {
                 if (c == ':') {
                   obj->prefix     = obj->tag;
-                  obj->prefixsize = (p - obj->prefix);
+                  obj->prefixsize = (uint32_t)(p - obj->prefix);
                   obj->tag        = p + 1;
                 }
               }
@@ -197,7 +198,8 @@ xml_parse(const char * __restrict contents,
                   if (c != ' ' && c != '\r' && c != '\n' && c != '\t')
                     end = p + 1;
                 } else {
-                  c = *++p;
+                  /* c = *++p; */
+                  ++p;
                 }
                 
                 c = *++p;
@@ -300,7 +302,7 @@ xml_parse(const char * __restrict contents,
 
             obj->val    = val;
             val->parent = obj;
-            val->val    = s;
+            val->val    = (void *)s;
 
             while (c != '<') {
               if (c == '\0')
