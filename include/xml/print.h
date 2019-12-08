@@ -73,7 +73,7 @@ xml_print_ex(FILE  * __restrict ostream,
           if (xml->parent)
             fprintf(ostream, " />");
           else
-            fprintf(ostream, "</%.*s>", xml->tagsize, xml->tag);
+            fprintf(ostream, "></%.*s>", xml->tagsize, xml->tag);
           
           if (opt > 0)
             fprintf(ostream, "\n");
