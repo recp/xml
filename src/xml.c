@@ -74,7 +74,7 @@ xml_parse(const char * __restrict contents, bool reverse) {
 //        pos = endel;
       case '>':
 
-        if (pos == endta) {
+        if (pos == endtag) {
           /* switch parent back */
           if (!parent)
             goto err;
