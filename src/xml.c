@@ -174,7 +174,7 @@ xml_parse(const char * __restrict contents, bool reverse) {
               attr->namequote  = c;
               c                = *++p;
             }
-            
+
             attr->name = end = p;
             
             if (foundQuote) {
@@ -312,7 +312,7 @@ xml_parse(const char * __restrict contents, bool reverse) {
 err:
   
   if (attr)
-    free(attr);
+    memset(attr, 0, sizeof(xml_attr_t));
 
   if (tmproot.val) {
     ((xml_t *)tmproot.val)->parent = NULL;
