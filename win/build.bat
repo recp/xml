@@ -1,1 +1,1 @@
-msbuild json.vcxproj /p:Configuration=Release
+msbuild xml.vcxproj /p:Configuration=Release
