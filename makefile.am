@@ -1,0 +1,39 @@
+#******************************************************************************
+# Copyright (c), Recep Aslantas.                                              *
+#                                                                             *
+# MIT License (MIT), http://opensource.org/licenses/MIT                       *
+# Full license can be found in the LICENSE file                               *
+#                                                                             *
+#******************************************************************************
+
+ACLOCAL_AMFLAGS = -I m4
+
+AM_CFLAGS = -Wall \
+            -std=gnu99 \
+            -O3 \
+            -Wstrict-aliasing=2 \
+            -fstrict-aliasing \
+            -pedantic
+
+lib_LTLIBRARIES = libxml.la
+libxml_la_LDFLAGS = -no-undefined -version-info 0:1:0
+
+xmldir=$(includedir)/xml
+xml_HEADERS = include/xml/version.h \
+               include/xml/common.h \
+               include/xml/xml.h \
+               include/xml/util.h \
+               include/xml/print.h \
+               include/xml/objmap.h
+
+xml_calldir=$(includedir)/xml/call
+xml_call_HEADERS = include/xml/call/xml.h
+
+xml_impldir=$(includedir)/xml/impl
+xml_impl_HEADERS = include/xml/impl/impl_mem.h \
+                   include/xml/impl/impl_parse.h \
+                   include/xml/impl/impl_common.h \
+                   include/xml/impl/impl_objmap.h
+
+libxml_la_SOURCES=\
+    src/xml.c
