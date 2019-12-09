@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{643fcb40-1fd3-45db-8a13-b33fe76c9582}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{397b6f1d-b13c-4d9f-a936-dc40a5a10353}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\xml">
+      <UniqueIdentifier>{57bc018d-41fd-4249-ac05-86cc05f8ecb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\xml\call">
+      <UniqueIdentifier>{464f17bf-1f5e-4ac6-86af-dd37717eaedc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\xml\impl">
+      <UniqueIdentifier>{3b50d0df-6b82-4b21-afb7-4fd24f38ce4d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\xml.c">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\xml\common.h">
+      <Filter>include\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\xml.h">
+      <Filter>include\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\print.h">
+      <Filter>include\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\util.h">
+      <Filter>include\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\version.h">
+      <Filter>include\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\objmap.h">
+      <Filter>include\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\call\xml.h">
+      <Filter>include\xml\call</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\impl\impl_common.h">
+      <Filter>include\xml\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\impl\impl_mem.h">
+      <Filter>include\xml\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\impl\impl_parse.h">
+      <Filter>include\xml\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\impl\impl_objmap.h">
+      <Filter>include\xml\impl</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
