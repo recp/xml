@@ -1,5 +1,10 @@
 # 🔋 XML parser for `C`
 
+[![Build Status](https://travis-ci.org/recp/xml.svg?branch=master)](https://travis-ci.org/recp/xml)
+[![Build status](https://ci.appveyor.com/api/projects/status/ugk4im145es00v3g/branch/master?svg=true)](https://ci.appveyor.com/project/recp/xml/branch/master)
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c3439f84b19f40d2a5da3b748b3fe6b4)](https://www.codacy.com/manual/recp/xml?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=recp/xml&amp;utm_campaign=Badge_Grade)
+
 This is very simple and very powerful XML parser. It creates DOM-like data structure and allows to iterate and process XML objects very simple way.
 It does not alloc any memory for XML itself, it only allocs memory for tokens. It also does not use recursive way to build data structure which makes it very fast to build DOM-like tree structure.
 
