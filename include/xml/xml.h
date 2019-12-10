@@ -51,6 +51,10 @@ XML_INLINE
 void
 xml_free(xml_doc_t * __restrict jsondoc);
 
+XML_INLINE
+xml_attr_t*
+xml_attr(const xml_t * __restrict object, const char * __restrict name);
+
 #include "impl/impl_parse.h"
 #include "impl/impl_common.h"
 #include "objmap.h"
