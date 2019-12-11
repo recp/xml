@@ -10,9 +10,7 @@
 
 #include "common.h"
 #include "util.h"
-
-#include <stdlib.h>
-#include <string.h>
+#include "attrib.h"
 
 /*!
  * @brief parse xml string
@@ -51,6 +49,13 @@ XML_INLINE
 void
 xml_free(xml_doc_t * __restrict jsondoc);
 
+/*!
+* @brief get an attribute by name for given XML element
+*
+* @param[in] object   xml element
+* @param[in] name     attribute name to find
+* @return attribute (xml_attr_t)
+*/
 XML_INLINE
 xml_attr_t*
 xml_attr(const xml_t * __restrict object, const char * __restrict name);

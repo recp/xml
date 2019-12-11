@@ -32,6 +32,7 @@
     <ClInclude Include="..\include\xml\objmap.h" />
     <ClInclude Include="..\include\xml\print.h" />
     <ClInclude Include="..\include\xml\util.h" />
+    <ClInclude Include="..\include\xml\attrib.h" />
     <ClInclude Include="..\include\xml\version.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -23,6 +23,7 @@ xml_HEADERS = include/xml/version.h \
                include/xml/common.h \
                include/xml/xml.h \
                include/xml/util.h \
+               include/xml/attrib.h \
                include/xml/print.h \
                include/xml/objmap.h
 

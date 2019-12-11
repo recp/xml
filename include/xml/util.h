@@ -9,8 +9,6 @@
 #define xml_util_h
 
 #include "common.h"
-#include <stdlib.h>
-#include <string.h>
 
 /*!
  * @brief return xml object from value

@@ -35,6 +35,9 @@
     <ClInclude Include="..\include\xml\util.h">
       <Filter>include\xml</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\xml\attrib.h">
+      <Filter>include\xml</Filter>
+    </ClInclude>
     <ClInclude Include="..\include\xml\version.h">
       <Filter>include\xml</Filter>
     </ClInclude>

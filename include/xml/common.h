@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
 #if defined(_MSC_VER)
 #  ifdef XML_DLL
