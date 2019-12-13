@@ -42,4 +42,36 @@ xml_attr(const xml_t * __restrict object, const char * __restrict name) {
   return iter;
 }
 
+XML_INLINE
+xml_t*
+xml_elem(const xml_t * __restrict object, const char * __restrict name) {
+  xml_t *iter;
+  size_t namesize;
+  
+  if (!object || !name || object->type != XML_ELEMENT || !(iter = object->val))
+    return NULL;
+  
+  namesize = strlen(name);
+  while (iter && strncmp(iter->tag, name, namesize) != 0)
+    iter = iter->next;
+
+  return iter;
+}
+
+XML_INLINE
+xml_t*
+xml_elem_next(const xml_t * __restrict current, const char * __restrict name) {
+  xml_t *iter;
+  size_t namesize;
+  
+  if (!current || !name || (iter = current->next))
+    return NULL;
+  
+  namesize = strlen(name);
+  while (iter && strncmp(iter->tag, name, namesize) != 0)
+    iter = iter->next;
+
+  return iter;
+}
+
 #endif /* xml_impl_common_h */

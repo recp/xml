@@ -60,6 +60,28 @@ XML_INLINE
 xml_attr_t*
 xml_attr(const xml_t * __restrict object, const char * __restrict name);
 
+/*!
+* @brief get an child element by name for given XML element
+*
+* @param[in] object   xml element
+* @param[in] name     element name to find
+* @return element (xml_t)
+*/
+XML_INLINE
+xml_t*
+xml_elem(const xml_t * __restrict object, const char * __restrict name);
+
+/*!
+* @brief get an child element by name for given XML element
+*
+* @param[in] current  current xml element
+* @param[in] name     element name to find
+* @return element (xml_t)
+*/
+XML_INLINE
+xml_t*
+xml_elem_next(const xml_t * __restrict current, const char * __restrict name);
+
 #include "impl/impl_parse.h"
 #include "impl/impl_common.h"
 #include "objmap.h"
