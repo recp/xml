@@ -137,13 +137,6 @@ xml_parse(const char * __restrict contents,
       default: {
         switch (pos) {
           case begintag:
-            
-            if (c == '!') {
-              /* skip */
-              printf("grtgtr");
-//              break;
-            }
-
             /* switch parent */
             parent    = obj;
             obj       = xml__impl_calloc(doc, sizeof(xml_t));
