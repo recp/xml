@@ -24,30 +24,30 @@
  this may be more readable than manually put values to objmap struct.
  */
 
-#define XML_OBJMAP_FN(KEY, FUN, PARAM) \
-  {\
-    .object       = NULL, \
-    .key          = KEY,\
-    .foundFunc    = {FUN, PARAM}, \
-    .notFoundFunc = {NULL, NULL}, \
-    .userdata     = NULL \
+#define XML_OBJMAP_FN(KEY, FUN, PARAM)                                        \
+  {                                                                           \
+    .object       = NULL,                                                     \
+    .key          = KEY,                                                      \
+    .foundFunc    = {FUN, PARAM},                                             \
+    .notFoundFunc = {NULL, NULL},                                             \
+    .userdata     = NULL                                                      \
   }
 
-#define XML_OBJMAP_OBJ(KEY, USERDATA) \
-  {\
-    .object       = NULL, \
-    .key          = KEY, \
-    .foundFunc    = {NULL, NULL}, \
-    .notFoundFunc = {NULL, NULL}, \
-    .userdata     = USERDATA \
+#define XML_OBJMAP_OBJ(KEY, USERDATA)                                         \
+  {                                                                           \
+    .object       = NULL,                                                     \
+    .key          = KEY,                                                      \
+    .foundFunc    = {NULL, NULL},                                             \
+    .notFoundFunc = {NULL, NULL},                                             \
+    .userdata     = USERDATA                                                  \
   }
 
 typedef void (*xml_objmap_fun_t)(xml_t * __restrict object,
-                                 void   * __restrict userdata);
+                                 void  * __restrict userdata);
 
 typedef struct xml_func_t {
-  xml_objmap_fun_t  func;
-  void             *param;
+  xml_objmap_fun_t func;
+  void            *param;
 } xml_func_t;
 
 typedef struct xml_objmap_t {
@@ -62,14 +62,14 @@ XML_INLINE
 void
 xml_objmap(xml_t        * __restrict obj,
            xml_objmap_t * __restrict objmap,
-           size_t                     count);
+           size_t                    count);
 
 XML_INLINE
 void
 xml_objmap_call(xml_t        * __restrict obj,
                 xml_objmap_t * __restrict objmap,
-                size_t                     count,
-                bool          * __restrict stop);
+                size_t                    count,
+                bool         * __restrict stop);
 
 #include "impl/impl_objmap.h"
 
