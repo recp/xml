@@ -28,7 +28,7 @@ xml_free(xml_doc_t * __restrict doc) {
 
 XML_INLINE
 xml_attr_t*
-xml_attr(const xml_t * __restrict object, const char * __restrict name) {
+xmla(const xml_t * __restrict object, const char * __restrict name) {
   xml_attr_t *iter;
   size_t      namesize;
 

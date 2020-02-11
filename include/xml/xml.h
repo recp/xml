@@ -58,7 +58,7 @@ xml_free(xml_doc_t * __restrict jsondoc);
 */
 XML_INLINE
 xml_attr_t*
-xml_attr(const xml_t * __restrict object, const char * __restrict name);
+xmla(const xml_t * __restrict object, const char * __restrict name);
 
 /*!
 * @brief get an child element by name for given XML element
