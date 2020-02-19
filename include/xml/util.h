@@ -42,6 +42,9 @@ xml_xml(const xml_t * __restrict object) {
 XML_INLINE
 const char*
 xml_string(const xml_t * __restrict object) {
+  if (!object || object->type != XML_STRING)
+    return NULL;
+
   return (const char *)object->val;
 }
 
