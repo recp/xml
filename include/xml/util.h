@@ -28,6 +28,9 @@ xml_valtype(const xml_t * __restrict object) {
 XML_INLINE
 xml_t*
 xml_xml(const xml_t * __restrict object) {
+  if (!object || object->type != XML_ELEMENT)
+    return NULL;
+
   return (xml_t *)object->val;
 }
 
