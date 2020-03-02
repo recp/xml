@@ -99,7 +99,7 @@ xml_print_ex(FILE  * __restrict ostream,
         break;
       }
       case XML_STRING:
-        fprintf(ostream, "%.*s", xml->valsize, xml_string(xml));
+        fprintf(ostream, "%.*s", xml->valsize, xmls(xml));
         break;
       default:
         break;
