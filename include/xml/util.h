@@ -35,143 +35,167 @@ xml_xml(const xml_t * __restrict object) {
 }
 
 /*!
- * @brief return non-NULL terminated string value
+ * @brief return string node of next node or itself if it is sting node (>=)
+ *        first you could get string node by xmls() then use this to get next 
+ *        string node until NULL
  *
- * you must use object->valsize to copy, compare ... string
+ * if XML_READONLY is used then the string returned from obj->val is not NULL
+ * terminated, so you must use obj->valsize to copy, compare ... string
+ * otherwise if XML_READONLY is used then the obj->val is NULL terminated string
  *
- * @param[in] object xml object
+ * @param[in] obj xml node to compare if it is string node
+ * @return string node
+ */
+XML_INLINE
+xml_t*
+xmls_next(xml_t * __restrict obj) {
+  do {
+    if (!obj || obj->type == XML_STRING)
+      return obj;
+    obj = obj->next;
+  } while (obj);
+  return NULL;
+}
+
+/*!
+ * @brief return first string node
+ *
+ * if XML_READONLY is used then the string returned from obj->val is not NULL
+ * terminated, so you must use obj->valsize to copy, compare ... string
+ * otherwise if XML_READONLY is used then the obj->val is NULL terminated string
+ *
+ * @param[in] obj xml node to get its value
  * @return non-NULL terminated string value (pointer only)
  */
 XML_INLINE
-const char*
-xmls(const xml_t * __restrict object) {
-  if (!object || object->type != XML_STRING)
+xml_t*
+xmls(xml_t * __restrict obj) {
+  if (!obj && !(obj = obj->val))
     return NULL;
-
-  return (const char *)object->val;
+  return xmls_next(obj);
 }
 
 /*!
  * @brief creates number (int32) from string value
  *
- * @param[in] object       xml element
+ * @param[in] obj          xml element
  * @param[in] defaultValue default value if operation fails
  * @return number
  */
 XML_INLINE
 int32_t
-xml_i32(const xml_t * __restrict object, int32_t defaultValue) {
-  if (!object || object->type != XML_STRING || !object->val)
+xml_i32(const xml_t * __restrict obj, int32_t defaultValue) {
+  const char *v;
+  if (!(v = xmls(obj)))
     return defaultValue;
 
-  return (int32_t)strtol(object->val, NULL, 10);
+  return (int32_t)strtol(v, NULL, 10);
 }
 
 /*!
  * @brief creates number (uint32) from string value
  *
- * @param[in] object       xml element
+ * @param[in] obj          xml element
  * @param[in] defaultValue default value if operation fails
  * @return number
  */
 XML_INLINE
 uint32_t
-xml_u32(const xml_t * __restrict object, uint32_t defaultValue) {
-  if (!object || object->type != XML_STRING || !object->val)
+xml_u32(const xml_t * __restrict obj, uint32_t defaultValue) {
+  const char *v;
+  if (!(v = xmls(obj)))
     return defaultValue;
 
-  return (uint32_t)strtoul(object->val, NULL, 10);
+  return (uint32_t)strtoul(v, NULL, 10);
 }
 
 /*!
  * @brief creates number (int64) from string value
  *
- * @param[in] object       xml element
+ * @param[in] obj          xml element
  * @param[in] defaultValue default value if operation fails
  * @return number
  */
 XML_INLINE
 int64_t
-xml_i64(const xml_t * __restrict object, int64_t defaultValue) {
-  if (!object || object->type != XML_STRING || !object->val)
+xml_i64(const xml_t * __restrict obj, int64_t defaultValue) {
+  const char *v;
+  if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtoll(object->val, NULL, 10);
+  return strtoll(v, NULL, 10);
 }
 
 /*!
  * @brief creates number (uint64) from string value
  *
- * @param[in] object       xml element
+ * @param[in] obj          xml element
  * @param[in] defaultValue default value if operation fails
  * @return number
  */
 XML_INLINE
 uint64_t
-xml_u64(const xml_t * __restrict object, uint64_t defaultValue) {
-  if (!object || object->type != XML_STRING || !object->val)
+xml_u64(const xml_t * __restrict obj, uint64_t defaultValue) {
+  const char *v;
+  if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtoull(object->val, NULL, 10);
+  return strtoull(v, NULL, 10);
 }
 
 /*!
  * @brief creates number (float) from string value
  *
- * @param[in] object       xml element
+ * @param[in] obj          xml element
  * @param[in] defaultValue default value if operation fails
  * @return number
  */
 XML_INLINE
 float
-xml_float(const xml_t * __restrict object, float defaultValue) {
-  if (!object || object->type != XML_STRING || !object->val)
+xml_float(const xml_t * __restrict obj, float defaultValue) {
+  const char *v;
+  if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtof(object->val, NULL);
+  return strtof(v, NULL);
 }
 
 /*!
  * @brief creates number (double) from string value
  *
- * @param[in] object       xml element
+ * @param[in] obj          xml element
  * @param[in] defaultValue default value if operation fails
  * @return number
  */
 XML_INLINE
 double
-xml_double(const xml_t * __restrict object, double defaultValue) {
-  if (!object || object->type != XML_STRING || !object->val)
+xml_double(const xml_t * __restrict obj, double defaultValue) {
+  const char *v;
+  if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtod(object->val, NULL);
+  return strtod(v, NULL);
 }
 
 /*!
  * @brief creates boolean from string value
  *
- * @param[in] object       xml element
+ * @param[in] obj          xml element
  * @param[in] defaultValue default value if operation fails
  * @return boolean values as integer: 1 true, 0 false, error: defaultValue
  */
 XML_INLINE
 int
-xml_bool(const xml_t * __restrict object, int defaultValue) {
-  const char *boolString;
+xml_bool(const xml_t * __restrict obj, int defaultValue) {
+  const char *v;
   char        first;
 
-  if (!object || object->type != XML_STRING || !(boolString = object->val))
+  if (!(v = xmls(obj)))
     return defaultValue;
 
-  first = boolString[0];
+  first = v[0];
 
-  if (first == 't' || first == '1') {
-    return 1;
-  } else if (first == 'n' || first == '0') {
-    return 0;
-  }
-
-  return defaultValue;
+  return first == 't' || first == '1';
 }
 
 /*!
