@@ -23,6 +23,7 @@ Complete documentation: http://xml.readthedocs.io
 - provides some util functions to print xml, get int32, int64, float, double...
 - very small library
 - unique way to parse XML (check the object map section)
+- helper to get string nodes, primitive values (int, float, bool) for both attribs and values
 
 #### Object Map
 
