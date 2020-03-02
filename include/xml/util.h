@@ -60,7 +60,7 @@ xml_string(const xml_t * __restrict object) {
  */
 XML_INLINE
 int32_t
-xml_int32(const xml_t * __restrict object, int32_t defaultValue) {
+xml_i32(const xml_t * __restrict object, int32_t defaultValue) {
   if (!object || object->type != XML_STRING || !object->val)
     return defaultValue;
 
@@ -76,7 +76,7 @@ xml_int32(const xml_t * __restrict object, int32_t defaultValue) {
  */
 XML_INLINE
 uint32_t
-xml_uint32(const xml_t * __restrict object, uint32_t defaultValue) {
+xml_u32(const xml_t * __restrict object, uint32_t defaultValue) {
   if (!object || object->type != XML_STRING || !object->val)
     return defaultValue;
 
@@ -92,7 +92,7 @@ xml_uint32(const xml_t * __restrict object, uint32_t defaultValue) {
  */
 XML_INLINE
 int64_t
-xml_int64(const xml_t * __restrict object, int64_t defaultValue) {
+xml_i64(const xml_t * __restrict object, int64_t defaultValue) {
   if (!object || object->type != XML_STRING || !object->val)
     return defaultValue;
 
@@ -108,7 +108,7 @@ xml_int64(const xml_t * __restrict object, int64_t defaultValue) {
  */
 XML_INLINE
 uint64_t
-xml_uint64(const xml_t * __restrict object, uint64_t defaultValue) {
+xml_u64(const xml_t * __restrict object, uint64_t defaultValue) {
   if (!object || object->type != XML_STRING || !object->val)
     return defaultValue;
 

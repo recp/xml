@@ -19,7 +19,7 @@
  */
 XML_INLINE
 int32_t
-xmla_int32(const xml_attr_t * __restrict attr, int32_t defaultValue) {
+xmla_i32(const xml_attr_t * __restrict attr, int32_t defaultValue) {
   if (!attr || !attr->val)
     return defaultValue;
 
@@ -35,7 +35,7 @@ xmla_int32(const xml_attr_t * __restrict attr, int32_t defaultValue) {
  */
 XML_INLINE
 uint32_t
-xmla_uint32(const xml_attr_t * __restrict attr, uint32_t defaultValue) {
+xmla_u32(const xml_attr_t * __restrict attr, uint32_t defaultValue) {
   if (!attr || !attr->val)
     return defaultValue;
 
@@ -51,7 +51,7 @@ xmla_uint32(const xml_attr_t * __restrict attr, uint32_t defaultValue) {
  */
 XML_INLINE
 int64_t
-xmla_int64(const xml_attr_t * __restrict attr, int64_t defaultValue) {
+xmla_i64(const xml_attr_t * __restrict attr, int64_t defaultValue) {
   if (!attr || !attr->val)
     return defaultValue;
 
@@ -67,7 +67,7 @@ xmla_int64(const xml_attr_t * __restrict attr, int64_t defaultValue) {
  */
 XML_INLINE
 uint64_t
-xmla_uint64(const xml_attr_t * __restrict attr, uint64_t defaultValue) {
+xmla_u64(const xml_attr_t * __restrict attr, uint64_t defaultValue) {
   if (!attr || !attr->val)
     return defaultValue;
 
