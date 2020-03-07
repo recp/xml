@@ -92,7 +92,7 @@ xmls_sumlen(const xml_t * __restrict obj) {
     len++; /* NULL terminator */
     do {
       len += v->valsize;
-    } while (v = xmls_next(v));
+    } while ((v = xmls_next(v)));
   }
 
   return len;
