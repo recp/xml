@@ -25,7 +25,7 @@ typedef enum xml_options_t {
    * string-to-number converter. Since this library wants to be lightweight, 
    * it won't add this functionality. In the uture things may be changed.
    */ 
-  XML_READONLY = 1 << 4,
+  XML_READONLY = 1 << 2,
 
   /* --------------------- DEFAULT OPTIONS ------------------------------------
    *
