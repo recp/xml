@@ -12,12 +12,12 @@
 #include "impl_mem.h"
 
 typedef enum xml_position {
-  unknown  = 0,
-  begintag = 1,
-  endtag,
-  beginel,
-  endel,
-  beginattr
+  unknown   = 0,
+  begintag  = 1,
+  endtag    = 2,
+  beginel   = 3,
+  endel     = 4,
+  beginattr = 5
 } xml_position;
 
 XML_INLINE
