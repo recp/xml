@@ -33,16 +33,13 @@ extern "C" {
  *  4. free XML document with xml_free()
  *  5. free `contents`
  *
- * @param[in] contents          XML string
- * @param[in] reverse           store members, array items as reverse order
- * @param[in] separatePrefixes  separate prefixes and store them in xml->prefix
+ * @param[in] contents XML string
+ * @param[in] options  options use XML_DEFAULTS or XML_NONE for default
  * @return xml document which contains xml object as root object
  */
 XML_EXPORT
 xml_doc_t*
-xmlc_parse(const char * __restrict contents,
-           bool                    reverse,
-           bool                    separatePrefixes);
+xmlc_parse(const char * __restrict contents, xml_options_t options);
 
 /*!
  * @brief frees xml document and its allocated memory

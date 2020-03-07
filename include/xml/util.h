@@ -47,8 +47,8 @@ xml_xml(const xml_t * __restrict object) {
  * @return string node
  */
 XML_INLINE
-xml_t*
-xmls_next(xml_t * __restrict obj) {
+const xml_t*
+xmls_next(const xml_t * __restrict obj) {
   do {
     if (!obj || obj->type == XML_STRING)
       return obj;
@@ -68,8 +68,8 @@ xmls_next(xml_t * __restrict obj) {
  * @return non-NULL terminated string value (pointer only)
  */
 XML_INLINE
-xml_t*
-xmls(xml_t * __restrict obj) {
+const xml_t*
+xmls(const xml_t * __restrict obj) {
   if (!obj && !(obj = obj->val))
     return NULL;
   return xmls_next(obj);
@@ -85,11 +85,12 @@ xmls(xml_t * __restrict obj) {
 XML_INLINE
 int32_t
 xml_i32(const xml_t * __restrict obj, int32_t defaultValue) {
-  const char *v;
+  const xml_t *v;
+
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return (int32_t)strtol(v, NULL, 10);
+  return (int32_t)strtol(v->val, NULL, 10);
 }
 
 /*!
@@ -102,11 +103,12 @@ xml_i32(const xml_t * __restrict obj, int32_t defaultValue) {
 XML_INLINE
 uint32_t
 xml_u32(const xml_t * __restrict obj, uint32_t defaultValue) {
-  const char *v;
+  const xml_t *v;
+
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return (uint32_t)strtoul(v, NULL, 10);
+  return (uint32_t)strtoul(v->val, NULL, 10);
 }
 
 /*!
@@ -119,11 +121,12 @@ xml_u32(const xml_t * __restrict obj, uint32_t defaultValue) {
 XML_INLINE
 int64_t
 xml_i64(const xml_t * __restrict obj, int64_t defaultValue) {
-  const char *v;
+  const xml_t *v;
+
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtoll(v, NULL, 10);
+  return strtoll(v->val, NULL, 10);
 }
 
 /*!
@@ -136,11 +139,12 @@ xml_i64(const xml_t * __restrict obj, int64_t defaultValue) {
 XML_INLINE
 uint64_t
 xml_u64(const xml_t * __restrict obj, uint64_t defaultValue) {
-  const char *v;
+  const xml_t *v;
+
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtoull(v, NULL, 10);
+  return strtoull(v->val, NULL, 10);
 }
 
 /*!
@@ -153,11 +157,12 @@ xml_u64(const xml_t * __restrict obj, uint64_t defaultValue) {
 XML_INLINE
 float
 xml_float(const xml_t * __restrict obj, float defaultValue) {
-  const char *v;
+  const xml_t *v;
+
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtof(v, NULL);
+  return strtof(v->val, NULL);
 }
 
 /*!
@@ -170,11 +175,12 @@ xml_float(const xml_t * __restrict obj, float defaultValue) {
 XML_INLINE
 double
 xml_double(const xml_t * __restrict obj, double defaultValue) {
-  const char *v;
+  const xml_t *v;
+
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtod(v, NULL);
+  return strtod(v->val, NULL);
 }
 
 /*!
@@ -187,13 +193,13 @@ xml_double(const xml_t * __restrict obj, double defaultValue) {
 XML_INLINE
 int
 xml_bool(const xml_t * __restrict obj, int defaultValue) {
-  const char *v;
-  char        first;
+  const xml_t *v;
+  char         first;
 
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  first = v[0];
+  first = *(char *)v->val;
 
   return first == 't' || first == '1';
 }

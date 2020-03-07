@@ -12,6 +12,41 @@
 #include "util.h"
 #include "attrib.h"
 
+typedef enum xml_options_t {
+  XML_NONE     = 0,      /* use the default options (XML_DEFAULTS)           */
+  XML_REVERSE  = 1 << 0, /* store members, array items as reverse order      */
+  XML_PREFIXES = 1 << 1, /* separate prefixes and store them in xml->prefix  */
+
+  /*
+   * Don't touch to the content even temporarily, just parse it by creating 
+   * tokens. You cannot use utilities in xml library to convert string to a 
+   * number (strtol, strtof) because null terminator cannot be added. 
+   * But you can duplicate string to another place or bring your own 
+   * string-to-number converter. Since this library wants to be lightweight, 
+   * it won't add this functionality. In the uture things may be changed.
+   */ 
+  XML_READONLY = 1 << 4,
+
+  /* --------------------- DEFAULT OPTIONS ------------------------------------
+   *
+   * Option 1: NULL Terminator for Strings
+   * --------------------------------------------------------------------------
+   * Add null terminator for string values and attributes. You can also use
+   * valsize to get string byte length. All string functions shall work for
+   * xml->val member.
+   *
+   * NOTE: prefixes are not null terminated for now.
+   *
+   * This is disabled in READONLY mode.
+   *
+   * Option 2: separate prefixes from tag name
+   * --------------------------------------------------------------------------
+   * separate prefixes and store them in xml->prefix
+   *
+   */
+  XML_DEFAULTS = XML_PREFIXES
+} xml_options_t;
+
 /*!
  * @brief parse xml string
  *
@@ -31,16 +66,14 @@
  *  4. free XML document with xml_free()
  *  5. free `contents`
  *
- * @param[in] contents          XML string
- * @param[in] reverse           store members, array items as reverse order
- * @param[in] separatePrefixes  separate prefixes and store them in xml->prefix
+ * @param[in] contents XML string
+ * @param[in] options  options use XML_DEFAULTS or XML_NONE for default
+ *
  * @return xml document which contains xml object as root object
  */
 XML_INLINE
 xml_doc_t*
-xml_parse(const char * __restrict contents,
-          bool                    reverse,
-          bool                    separatePrefixes);
+xml_parse(const char * __restrict contents, xml_options_t options);
 
 /*!
  * @brief frees xml document and its allocated memory

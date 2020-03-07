@@ -22,24 +22,22 @@ typedef enum xml_position {
 
 XML_INLINE
 xml_doc_t*
-xml_parse(const char * __restrict contents,
-          bool                    reverse,
-          bool                    separatePrefixes) {
+xml_parse(const char * __restrict contents, xml_options_t options) {
   xml_doc_t   *doc;
   xml_t       *obj, *parent, *val;
   xml_attr_t  *attr;
-  const char  *tag, *p, *end, *s;
+  const char  *tag, *s;
   xml_t        tmproot;
   xml_position pos;
-  char         c, quote;
-  bool         foundQuote;
+  char        *p, *end, c, quote;
+  bool         foundQuote, reverse, sepPrefixes, readonly;
   
   if (!contents || (c = *contents) == '\0')
     return NULL;
   
   doc            = calloc(1, sizeof(*doc));
   doc->memroot   = calloc(1, sizeof(xml_mem_t) + XML_MEM_PAGE);
-  p              = contents;
+  p              = (char *)contents;
 
   memset(&tmproot, 0, sizeof(tmproot));
   tmproot.type   = XML_ELEMENT;
@@ -51,6 +49,10 @@ xml_parse(const char * __restrict contents,
   obj            = parent;
   pos            = unknown;
   quote          = '"';
+
+  reverse        = options & XML_REVERSE;
+  sepPrefixes    = options & XML_PREFIXES;
+  readonly       = options & XML_READONLY;
 
   ((xml_mem_t *)doc->memroot)->capacity = XML_MEM_PAGE;
   
@@ -132,7 +134,9 @@ xml_parse(const char * __restrict contents,
         } else {
           pos = beginel;
         }
-     
+        
+        if (!readonly)
+          *p++ = '\0';
         break;
       default: {
         switch (pos) {
@@ -161,7 +165,7 @@ xml_parse(const char * __restrict contents,
               if (c == '\0')
                 goto err;
               
-              if (separatePrefixes) {
+              if (sepPrefixes) {
                 if (c == ':') {
                   obj->prefix     = obj->tag;
                   obj->prefixsize = (uint32_t)(p - obj->prefix);
@@ -232,6 +236,9 @@ xml_parse(const char * __restrict contents,
             }
             
             attr->namesize = (int)(end - attr->name);
+            if (!readonly)
+              *end = '\0';
+
             if (attr->name == NULL || c  == '\0')
               goto err;
             
@@ -288,8 +295,10 @@ xml_parse(const char * __restrict contents,
             }
             
             attr->valsize = (int)(end - attr->val);
-            c             = *p;
-            
+            if (!readonly)
+              *end = '\0';
+
+            c          = *p;
             attr->next = obj->attr;
             obj->attr  = attr;
             attr       = NULL;
@@ -346,6 +355,5 @@ err:
   doc->root = tmproot.val;
   return doc;
 }
-
 
 #endif /* xml_impl_parse_h */
