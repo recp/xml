@@ -76,6 +76,29 @@ xmls(const xml_t * __restrict obj) {
 }
 
 /*!
+* @brief return sum of all length of string nodes
+*
+* @param[in] obj xml node to get its value
+* @return sum of all length of string nodes + 1 (null terminator)
+*/
+XML_INLINE
+size_t
+xmls_sumlen(const xml_t * __restrict obj) {
+  const xml_t *v;
+  size_t       len;
+  
+  len = 0;
+  v   = xmls(obj);
+
+  while (v) {
+    len += v->valsize;
+    v   = xmls_next(v);
+  }
+  
+  return len;
+}
+
+/*!
  * @brief creates number (int32) from string value
  *
  * @param[in] obj          xml element
