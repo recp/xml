@@ -10,7 +10,7 @@ It does not alloc any memory for XML itself, it only allocs memory for tokens. I
 #### Documentation
 
 Almost all functions (inline versions) and parameters are documented inside related headers. <br />
-Complete documentation: http://xml.readthedocs.io
+Complete documentation: TODO.
 
 ## Features
 
