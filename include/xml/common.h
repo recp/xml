@@ -64,9 +64,10 @@ typedef struct xml_t {
   const char        *tag;
   void              *val;
   uint32_t           valsize;
-  uint32_t           tagsize;
-  uint32_t           prefixsize;
-  xml_type_t         type;
+  uint16_t           tagsize;
+  uint16_t           prefixsize;
+  xml_type_t         type:16;
+  bool               readonly:1;
 } xml_t;
 
 typedef struct xml_doc_t {
