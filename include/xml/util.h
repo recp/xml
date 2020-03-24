@@ -35,9 +35,10 @@ xml_xml(const xml_t * __restrict object) {
 }
 
 /*!
- * @brief return string node of next node or itself if it is sting node (>=)
- *        first you could get string node by xmls() then use this to get next 
- *        string node until NULL
+ * @brief return string node of next node
+ *        first you should get string node by xmls() then use this to get next
+ *        string node until NULL. xmls() returns first chils node this returns
+ *        first next node.
  *
  * if XML_READONLY is used then the string returned from obj->val is not NULL
  * terminated, so you must use obj->valsize to copy, compare ... string
@@ -49,11 +50,18 @@ xml_xml(const xml_t * __restrict object) {
 XML_INLINE
 const xml_t*
 xmls_next(const xml_t * __restrict obj) {
+  const xml_t *o;
+  
+  o = obj;
+
   do {
-    if (!obj || obj->type == XML_STRING)
-      return obj;
-    obj = obj->next;
-  } while (obj);
+    if (!o || o->type == XML_STRING) {
+      if (o == obj)
+        return NULL;
+      return o;
+    }
+    o = o->next;
+  } while (o);
   return NULL;
 }
 
@@ -70,8 +78,12 @@ xmls_next(const xml_t * __restrict obj) {
 XML_INLINE
 const xml_t*
 xmls(const xml_t * __restrict obj) {
-  if (!obj && !(obj = obj->val))
+  if (!obj || !(obj = obj->val))
     return NULL;
+  
+  if (obj->type == XML_STRING)
+    return obj;
+
   return xmls_next(obj);
 }
 
