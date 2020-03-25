@@ -78,10 +78,9 @@ xmls_next(const xml_t * __restrict obj) {
 XML_INLINE
 const xml_t*
 xmls(const xml_t * __restrict obj) {
-  if (!obj || !(obj = obj->val))
-    return NULL;
-  
-  if (obj->type == XML_STRING)
+  if (!obj
+      || !(obj = obj->val)
+      || (obj->type == XML_STRING))
     return obj;
 
   return xmls_next(obj);
