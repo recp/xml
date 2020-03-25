@@ -48,7 +48,7 @@ xml_xml(const xml_t * __restrict object) {
  * @return string node
  */
 XML_INLINE
-const xml_t*
+xml_t*
 xmls_next(const xml_t * __restrict obj) {
   const xml_t *o;
   
@@ -76,11 +76,12 @@ xmls_next(const xml_t * __restrict obj) {
  * @return non-NULL terminated string value (pointer only)
  */
 XML_INLINE
-const xml_t*
+xml_t*
 xmls(const xml_t * __restrict obj) {
-  if (!obj
-      || !(obj = obj->val)
-      || (obj->type == XML_STRING))
+  if (!obj || obj->type != XML_ELEMENT)
+    return NULL;
+
+  if (!(obj = obj->val) || (obj->type == XML_STRING))
     return obj;
 
   return xmls_next(obj);
