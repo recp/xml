@@ -54,6 +54,13 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
   sepPrefixes    = options & XML_PREFIXES;
   readonly       = options & XML_READONLY;
 
+  doc->reverse     = reverse;
+  doc->readonly    = readonly;
+  doc->sepPrefixes = sepPrefixes;
+
+  tmproot.readonly = readonly;
+  tmproot.reverse  = reverse;
+  
   ((xml_mem_t *)doc->memroot)->capacity = XML_MEM_PAGE;
   
   do {
@@ -151,9 +158,11 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
         switch (pos) {
           case begintag:
             /* switch parent */
-            parent    = obj;
-            obj       = xml__impl_calloc(doc, sizeof(xml_t));
-            obj->type = XML_ELEMENT;
+            parent        = obj;
+            obj           = xml__impl_calloc(doc, sizeof(xml_t));
+            obj->type     = XML_ELEMENT;
+            obj->readonly = readonly;
+            obj->reverse  = reverse;
             
             /* parent must not be NULL */
             
@@ -316,8 +325,11 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             goto again;
           case beginel:
           case endel:
-            val       = xml__impl_calloc(doc, sizeof(xml_t));
-            val->type = XML_STRING;
+            val           = xml__impl_calloc(doc, sizeof(xml_t));
+            val->type     = XML_STRING;
+            
+            val->readonly = readonly;
+            val->reverse  = reverse;
             
             /* parent must not be NULL */
 

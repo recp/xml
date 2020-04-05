@@ -68,12 +68,16 @@ typedef struct xml_t {
   uint16_t           prefixsize;
   xml_type_t         type:16;
   bool               readonly:1;
+  bool               reverse:1;
 } xml_t;
 
 typedef struct xml_doc_t {
   void       *memroot;
   xml_t      *root;
   const char *ptr;
+  bool        readonly:1;
+  bool        reverse:1;
+  bool        sepPrefixes:1;
 } xml_doc_t;
 
 #endif /* xml_common_h */
