@@ -66,11 +66,17 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
       case '\n':
       case '\t':
         break;
-      case '<': {
+      case '<': { /* TODO: what if we get << or <<!--  ->TAG>... here? */
         if (pos == begintag)
           goto err;
 
         pos = begintag;
+        
+        if (!readonly) {
+          *p = '\0';
+          if ((c = *++p) != '\0')
+            goto again;;
+        }
         break;
       }
       case '?':
@@ -135,8 +141,11 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
           pos = beginel;
         }
         
-        if (!readonly)
-          *p++ = '\0';
+        if (!readonly) {
+          *p = '\0';
+          if ((c = *++p) != '\0')
+            goto again;;
+        }
         break;
       default: {
         switch (pos) {
