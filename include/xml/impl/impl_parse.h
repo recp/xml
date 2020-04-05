@@ -202,7 +202,7 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             p--;
             break;
           case beginattr:
-            attr = xml__impl_calloc(doc, sizeof(xml_t));
+            attr = xml__impl_calloc(doc, sizeof(xml_attr_t));
             
             /* attrib key */
             if ((foundQuote = (c == '"' || c == '\'' || c == '`'))) {
