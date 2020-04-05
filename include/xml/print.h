@@ -28,17 +28,18 @@ xml_print_ex(FILE  * __restrict ostream,
              int                opt) {
   const xml_t      *parent;
   const xml_attr_t *a;
-  int               pad, i;
+  int               pad, i, snode;
 
-  pad    = 0;
+  pad    = snode = 0;
   parent = NULL;
 
   while (xml) {
-    if (opt > 0 && xml->type == XML_ELEMENT) {
+    if (!snode && opt > 0 && xml->type == XML_ELEMENT) {
       for (i = 0; i < pad; i++)
         fprintf(ostream, "\t");
     }
 
+    snode = 0;
     switch (xml->type) {
       case XML_ELEMENT: {
         if (!xml->prefix)
@@ -100,6 +101,7 @@ xml_print_ex(FILE  * __restrict ostream,
       }
       case XML_STRING:
         fprintf(ostream, "%.*s", xml->valsize, xml->val);
+        snode = 1;
         break;
       default:
         break;
@@ -108,6 +110,7 @@ xml_print_ex(FILE  * __restrict ostream,
     if (xml->next) {
       xml = xml->next;
     } else if ((parent = xml->parent)) {
+      snode = 0;
       do {
         if (opt > 0 && (!xml || (xml && xml->type == XML_ELEMENT))) {
           for (i = 0; i < pad; i++)
