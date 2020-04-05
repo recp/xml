@@ -54,14 +54,16 @@ xmls_next(const xml_t * __restrict obj) {
   
   o = obj;
 
-  do {
+  while (o) {
+    o = o->next;
+
     if (!o || o->type == XML_STRING) {
       if (o == obj)
         return NULL;
       return o;
     }
-    o = o->next;
-  } while (o);
+  }
+
   return NULL;
 }
 
