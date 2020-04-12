@@ -279,6 +279,35 @@ xml_tag_eqsz(const xml_t * __restrict obj,
 }
 
 /*!
+* @brief compares xml tag with a string and like strncmp.
+*
+* @param[in] obj     xml element
+* @param[in] str     string to compare
+* @param[in] strsize size of string to compare
+* @return a number like strncmp returns
+*/
+XML_INLINE
+int
+xml_tag_cmp(const xml_t * __restrict obj, const char * __restrict str) {
+  size_t strsize;
+  int    c;
+    
+  strsize = strlen(str);
+
+  if (obj->tagsize > strsize) {
+    if ((c = strncmp(obj->tag, str, strsize) != 0))
+      return c;
+    return 1;
+  } else if (obj->tagsize < strsize) {
+    if ((c = strncmp(obj->tag, str, obj->tagsize) != 0))
+      return c;
+    return -1;
+  }
+
+  return strncmp(obj->tag, str, strsize);
+}
+
+/*!
  * @brief compares xml value with a string
  *
  * @param[in] obj xml element
