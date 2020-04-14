@@ -192,14 +192,23 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
               }
 
               c = *++p;
-            } while (c != ' ' && c != '>');
+            } while (c != ' ' && c != '/' && c != '>');
             
             obj->tagsize = (int)(p - obj->tag);
             
-            if (c == '>')
+            if (c == '>') {
               pos = beginel;
-            else
+            } else if (c == '/') {
+              pos = endtag;
+              
+              if (!readonly) {
+                *p = '\0';
+                if ((c = *++p) != '\0')
+                  goto again;;
+              }
+            } else {
               pos = beginattr;
+            }
             
             /*
              TODO: obly opens if error is handled
