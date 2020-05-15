@@ -137,13 +137,13 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             goto err;
           
           if (!reverse) {
-            obj->val = obj->next;
-            obj->next  = NULL;
+            obj->val  = obj->next;
+            obj->next = NULL;
           }
           
-          obj              = parent;
-          parent           = parent->parent;
-          pos              = endel;
+          obj    = parent;
+          parent = parent->parent;
+          pos    = endel;
         } else {
           pos = beginel;
         }
