@@ -86,6 +86,49 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
         }
         break;
       }
+      case '!': { /* Comment + CTADA */
+        char c1, c2;
+        
+        /* comments, skip for now. */
+        if (p[1] != '\0' && p[1] == '-' && p[2] == '-') {
+          p  = p + 2;
+          c  = *p;
+          c1 = c2 = '\0';
+
+          do {
+            if (c == '\0')
+              goto err;
+
+            c1 = c2;
+            c2 = c;
+            c  = *++p;
+            
+          } while (!(c1 == '-' && c2 == '-' && c == '>'));
+
+          pos = beginel;
+        }
+        
+        /* CDATA or similar data, skip for now. */
+        else if (p[1] != '\0' && p[1] == '[') {
+          p  = p + 2;
+          c  = *p;
+          c1 = c2 = '\0';
+          
+          do {
+            if (c == '\0')
+              goto err;
+
+            c1 = c2;
+            c2 = c;
+            c  = *++p;
+
+          } while (!(c1 == ']' && c2 == ']' && c == '>')
+                   && !(c1 == ']' && c2 == ' ' && c == '>'));
+
+          pos = beginel;
+        }
+        break;
+      }
       case '?':
         /* skip XML header e.g. version line */
         if (pos == begintag) {
