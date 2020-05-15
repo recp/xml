@@ -93,7 +93,7 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
         if (p[1] != '\0' && p[1] == '-' && p[2] == '-') {
           p  = p + 2;
           c  = *p;
-          c1 = c2 = '\0';
+          c2 = '\0';
 
           do {
             if (c == '\0')
@@ -112,7 +112,7 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
         else if (p[1] != '\0' && p[1] == '[') {
           p  = p + 2;
           c  = *p;
-          c1 = c2 = '\0';
+          c2 = '\0';
           
           do {
             if (c == '\0')

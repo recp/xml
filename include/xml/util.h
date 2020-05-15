@@ -283,7 +283,6 @@ xml_tag_eqsz(const xml_t * __restrict obj,
 *
 * @param[in] obj     xml element
 * @param[in] str     string to compare
-* @param[in] strsize size of string to compare
 * @return a number like strncmp returns
 */
 XML_INLINE
