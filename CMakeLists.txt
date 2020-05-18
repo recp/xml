@@ -23,7 +23,7 @@ if(MSVC)
 	add_definitions(-D_WINDOWS -D_USRDLL -DXML_EXPORTS -DXML_DLL)
 	add_compile_options(/W3 /Ox /Gy /Oi /TC)
 else()
-  add_compile_options(-Wall -Werror -std=gnu99 -O3 -fstrict-aliasing)
+  add_compile_options(-Wall -Werror -O3 -fstrict-aliasing)
 endif()
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
