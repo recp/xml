@@ -63,9 +63,21 @@ cd win
 .\build.bat
 ```
 
-### Cmake
+##### Cmake options with Defaults:
 
-todo.
+```CMake
+option(XML_SHARED "Shared build" ON)
+option(XML_STATIC "Static build" OFF)
+option(XML_USE_C99 "" OFF) # C11 
+option(XML_USE_TEST "Enable Tests" OFF) # for make check - make test
+```
+
+```bash
+mkdir build && cd build
+cmake ..
+make
+[sudo] make install
+```
 
 ### Header-only or Compiled Library
 
