@@ -40,13 +40,13 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
 # Target Start
-add_library(xml ${XML_BUILD} src/xml.c)
+add_library(${PROJECT_NAME} ${XML_BUILD} src/xml.c)
 
-set_target_properties(xml PROPERTIES 
+set_target_properties(${PROJECT_NAME} PROPERTIES 
                              VERSION ${PROJECT_VERSION}
                            SOVERSION ${PROJECT_VERSION_MAJOR})
 
-target_include_directories(xml PRIVATE include)
+target_include_directories(${PROJECT_NAME} PRIVATE include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Install 
