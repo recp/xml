@@ -25,68 +25,19 @@ Complete documentation: TODO.
 - unique way to parse XML (check the object map section)
 - helper to get string nodes, primitive values (int, float, bool) for both attribs and values
 
-#### Object Map
-
-Here a VERY UNIQUE and VERY COOL and VERY EASY and VERY FAST way to parse known XML: objmap. 
-
-```C
-void
-callback_1(xml_t * __restrict xml, void * __restrict obj) {
-  printf("entered callback_1\n");
-}
-
-xml = xml_parse(/* XML string */, true, true);
-
-xml_objmap_t objmap[] = {
-    {
-      .key = "key1",
-      .foundFunc = {
-        .func  = callback_1,
-        .param = "callback 1 param" 
-      }
-    },
-    {
-      .key = "key2",
-      .foundFunc = {
-        .func = callback_1
-      }
-    }
-};
-
-/* or you can use macro helpers which is more readable if you don't need more details: */
-xml_objmap_t objmap[] = {
-    XML_OBJMAP_FN("key 1", func1, param1),
-    XML_OBJMAP_FN("key 2", func2, param2),
-    XML_OBJMAP_FN("key 3", func3, param3),
-    /* ... */
-};
-
-xml_objmap_call(xml, objmap, ARRAY_LEN(objmap), NULL);
-
-/* or use this to iterate objmap manually */
-xml_objmap(xml, objmap, ARRAY_LEN(objmap));
-```
-
-In this way you don't have to compare keys in a loopi just map the keys with a function or with userdata. You don't have to use function in this way, you may use to map xml object to userdata which may be a GOTO LABEL (to use compound gotos) or something else. 
-
-#### Important Note for tags and values
-
-- xml doesn't copy keys and values, it only gives pointers to key and values. So when compaing keys or copying values, you must use tagsize or valsize. Or you can use builtin inline functions.
-
 ## TODOs
 
 - [x] provide header only library and optionally compile version
 - [x] provide option to preserve array order (currently array order is reversed, because it is easy to parse it in this way; this may be changed. Please follow new commits or releases)
 - [x] provide option to separate tag prefixes
-- [ ] windows build
+- [x] windows build
 - [ ] documentation
-- [ ] handle or ignore comments?
-- [ ] cmake?
+- [x] handle or ignore comments? (ignored)
+- [x] handle or ignore CDATA? (ignored)
+- [x] cmake
 - [ ] tests
 - [ ] extra optimizations
 - [ ] usage in detail
-- [ ] Unicode support (UTF-8)
-- [ ] null object
 
 ## Build
 
@@ -195,8 +146,6 @@ while (xml) {
 
 #### Using Object Map
 
-Here a VERY UNIQUE and VERY COOL and VERY EASY and VERY FAST way to parse known XML: objmap. 
-
 ```C
 void
 callback_1(xml_t * __restrict xml, void * __restrict obj) {
@@ -231,7 +180,7 @@ xml_objmap_t objmap[] = {
 xml_objmap_call(xml, objmap, ARRAY_LEN(objmap), NULL);
 ```
 
-In this way you don't have to compare keys in a loopi just map the keys with a function or with userdata. You don't have to use function in this way, you may use to map xml object to userdata which may be a GOTO LABEL (to use compound gotos) or something else. 
+In this way you don't have to compare keys in a loop, just map the keys with a function or with userdata. You don't have to use function in this way, you may use to map xml object to userdata which may be a GOTO LABEL (to use compound gotos) or something else. 
 
 ## License
 
