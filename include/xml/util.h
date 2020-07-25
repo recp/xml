@@ -101,6 +101,12 @@ xmls_sumlen(const xml_t * __restrict obj) {
   const xml_t *v;
   size_t       len;
   
+  if (!obj)
+    return 0;
+
+  if (obj->type == XML_STRING)
+    return obj->valsize;
+
   len = 0;
   if ((v = xmls(obj))) {
     len++; /* NULL terminator */
