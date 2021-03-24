@@ -99,7 +99,7 @@ int main(int argc, const char * argv[]) {
   xml_doc_t *doc;
   xml_t     *root;
   
-  doc  = xml_parse(/* XML string */, true, true);
+  doc  = xml_parse(/* XML string */, XML_DEFAULTS);
   root = doc->root;
 
   xml_print_human(stderr, root);
@@ -116,7 +116,7 @@ int main(int argc, const char * argv[]) {
 const xml_doc_t *xmlDoc;
 const xml_t     *xml;
 
-xmlDoc = xml_parse(/* XML string */, true, true);
+xmlDoc = xml_parse(/* XML string */, XML_DEFAULTS);
 xml    = xmlDoc->root->value;
 
 /* already defined in util.h */
@@ -164,7 +164,7 @@ callback_1(xml_t * __restrict xml, void * __restrict obj) {
   printf("entered callback_1\n");
 }
 
-xml = xml_parse(/* XML string */, true, true);
+xml = xml_parse(/* XML string */, XML_DEFAULTS);
 
 xml_objmap_t objmap[] = {
     {
