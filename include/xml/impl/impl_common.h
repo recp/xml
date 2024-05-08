@@ -64,7 +64,7 @@ xml_elem_next(const xml_t * __restrict current, const char * __restrict name) {
   xml_t *iter;
   size_t namesize;
   
-  if (!current || !name || (iter = current->next))
+  if (!current || !name || !(iter = current->next))
     return NULL;
   
   namesize = strlen(name);
