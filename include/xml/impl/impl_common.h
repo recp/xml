@@ -36,7 +36,10 @@ xmla(const xml_t * __restrict object, const char * __restrict name) {
     return NULL;
 
   namesize = strlen(name);
-  while (iter && strncmp(iter->name, name, namesize) != 0)
+  while (iter
+         && (!iter->name
+             || (size_t)iter->namesize != namesize
+             || strncmp(iter->name, name, namesize) != 0))
     iter = iter->next;
 
   return iter;
@@ -52,7 +55,11 @@ xml_elem(const xml_t * __restrict object, const char * __restrict name) {
     return NULL;
   
   namesize = strlen(name);
-  while (iter && strncmp(iter->tag, name, namesize) != 0)
+  while (iter
+         && (iter->type != XML_ELEMENT
+             || !iter->tag
+             || (size_t)iter->tagsize != namesize
+             || strncmp(iter->tag, name, namesize) != 0))
     iter = iter->next;
 
   return iter;
@@ -68,7 +75,11 @@ xml_elem_next(const xml_t * __restrict current, const char * __restrict name) {
     return NULL;
   
   namesize = strlen(name);
-  while (iter && strncmp(iter->tag, name, namesize) != 0)
+  while (iter
+         && (iter->type != XML_ELEMENT
+             || !iter->tag
+             || (size_t)iter->tagsize != namesize
+             || strncmp(iter->tag, name, namesize) != 0))
     iter = iter->next;
 
   return iter;
