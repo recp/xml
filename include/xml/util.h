@@ -133,7 +133,9 @@ xml_i32(const xml_t * __restrict obj, int32_t defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return (int32_t)strtol(v->val, NULL, 10);
+  return (int32_t)xml__parse_int64(v->val,
+                                   v->val + v->valsize,
+                                   defaultValue);
 }
 
 /*!
@@ -151,7 +153,9 @@ xml_u32(const xml_t * __restrict obj, uint32_t defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return (uint32_t)strtoul(v->val, NULL, 10);
+  return (uint32_t)xml__parse_uint64(v->val,
+                                     v->val + v->valsize,
+                                     defaultValue);
 }
 
 /*!
@@ -169,7 +173,9 @@ xml_i64(const xml_t * __restrict obj, int64_t defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtoll(v->val, NULL, 10);
+  return xml__parse_int64(v->val,
+                          v->val + v->valsize,
+                          defaultValue);
 }
 
 /*!
@@ -187,7 +193,9 @@ xml_u64(const xml_t * __restrict obj, uint64_t defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtoull(v->val, NULL, 10);
+  return xml__parse_uint64(v->val,
+                           v->val + v->valsize,
+                           defaultValue);
 }
 
 /*!
@@ -205,7 +213,9 @@ xml_float(const xml_t * __restrict obj, float defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtof(v->val, NULL);
+  return (float)xml__parse_double(v->val,
+                                  v->val + v->valsize,
+                                  defaultValue);
 }
 
 /*!
@@ -223,7 +233,9 @@ xml_double(const xml_t * __restrict obj, double defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return strtod(v->val, NULL);
+  return xml__parse_double(v->val,
+                           v->val + v->valsize,
+                           defaultValue);
 }
 
 /*!
@@ -258,11 +270,18 @@ XML_INLINE
 bool
 xml_tag_eq(const xml_t * __restrict obj, const char * __restrict str) {
   size_t strsize;
-    
+  
+  if (!obj || !obj->tag || !str)
+    return false;
+  if (!str[0])
+    return obj->tagsize == 0;
+  if (!obj->tagsize || obj->tag[0] != str[0])
+    return false;
+
   if ((strsize = strlen(str)) != (size_t)obj->tagsize)
     return false;
 
-  return strncmp(str, obj->tag, strsize) == 0;
+  return xml__bytes_eq(str, obj->tag, strsize);
 }
 
 /*!
@@ -278,10 +297,17 @@ bool
 xml_tag_eqsz(const xml_t * __restrict obj,
              const char  * __restrict str,
              size_t                   strsize) {
+  if (!obj || !obj->tag || !str)
+    return false;
+  if (!strsize)
+    return obj->tagsize == 0;
+  if (!obj->tagsize || obj->tag[0] != str[0])
+    return false;
+
   if (strsize != (size_t)obj->tagsize)
     return false;
 
-  return strncmp(str, obj->tag, strsize) == 0;
+  return xml__bytes_eq(str, obj->tag, strsize);
 }
 
 /*!
@@ -296,15 +322,18 @@ int
 xml_tag_cmp(const xml_t * __restrict obj, const char * __restrict str) {
   size_t strsize;
   int    c;
-    
+
+  if (!obj || !obj->tag || !str)
+    return obj && obj->tag ? 1 : str ? -1 : 0;
+
   strsize = strlen(str);
 
   if (obj->tagsize > strsize) {
-    if ((c = strncmp(obj->tag, str, strsize) != 0))
+    if ((c = strncmp(obj->tag, str, strsize)) != 0)
       return c;
     return 1;
   } else if (obj->tagsize < strsize) {
-    if ((c = strncmp(obj->tag, str, obj->tagsize) != 0))
+    if ((c = strncmp(obj->tag, str, obj->tagsize)) != 0)
       return c;
     return -1;
   }
@@ -323,11 +352,18 @@ XML_INLINE
 bool
 xml_val_eq(const xml_t * __restrict obj, const char * __restrict str) {
   size_t strsize;
-    
+
+  if (!obj || !obj->val || !str)
+    return false;
+  if (!str[0])
+    return obj->valsize == 0;
+  if (!obj->valsize || ((const char *)obj->val)[0] != str[0])
+    return false;
+
   if ((strsize = strlen(str)) != (size_t)obj->valsize)
     return false;
 
-  return strncmp(str, obj->val, strsize) == 0;
+  return xml__bytes_eq(str, obj->val, strsize);
 }
 
 /*!
@@ -343,10 +379,17 @@ bool
 xml_val_eqsz(const xml_t * __restrict obj,
              const char   * __restrict str,
              size_t                    strsize) {
+  if (!obj || !obj->val || !str)
+    return false;
+  if (!strsize)
+    return obj->valsize == 0;
+  if (!obj->valsize || ((const char *)obj->val)[0] != str[0])
+    return false;
+
   if (strsize != (size_t)obj->valsize)
     return false;
 
-  return strncmp(str, obj->val, strsize) == 0;
+  return xml__bytes_eq(str, obj->val, strsize);
 }
 
 #endif /* xml_util_h */

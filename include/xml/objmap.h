@@ -28,6 +28,7 @@
   {                                                                           \
     .object       = NULL,                                                     \
     .key          = KEY,                                                      \
+    .keysize      = 0,                                                        \
     .foundFunc    = {FUN, PARAM},                                             \
     .notFoundFunc = {NULL, NULL},                                             \
     .userdata     = NULL                                                      \
@@ -37,6 +38,7 @@
   {                                                                           \
     .object       = NULL,                                                     \
     .key          = KEY,                                                      \
+    .keysize      = 0,                                                        \
     .foundFunc    = {NULL, NULL},                                             \
     .notFoundFunc = {NULL, NULL},                                             \
     .userdata     = USERDATA                                                  \
@@ -53,6 +55,7 @@ typedef struct xml_func_t {
 typedef struct xml_objmap_t {
   xml_t       *object; /* found xml object */
   const char  *key;
+  size_t       keysize;
   void        *userdata;
   xml_func_t   foundFunc;
   xml_func_t   notFoundFunc;

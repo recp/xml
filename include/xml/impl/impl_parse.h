@@ -72,7 +72,14 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
       case '\r':
       case '\n':
       case '\t':
-        break;
+        do {
+          c = *++p;
+        } while (c == ' ' || c == '\r' || c == '\n' || c == '\t');
+
+        if (c == '\0')
+          goto err;
+
+        goto again;
       case '<': { /* TODO: what if we get << or <<!--  ->TAG>... here? */
         if (pos == begintag)
           goto err;

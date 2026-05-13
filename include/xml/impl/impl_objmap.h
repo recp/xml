@@ -19,6 +19,8 @@ xml_objmap(xml_t        * __restrict obj,
            size_t                    count) {
   xml_objmap_t *item;
   size_t        start, end, i;
+  uint16_t      tagsize;
+  char          first;
 
   if (!obj || obj->type != XML_ELEMENT || !(obj = obj->val))
     return;
@@ -27,10 +29,17 @@ xml_objmap(xml_t        * __restrict obj,
   end   = count;
 
   while (obj) {
+    tagsize = obj->tagsize;
+    first   = obj->tag ? obj->tag[0] : '\0';
     for (i = start; i < end; i++) {
       item = &objmap[i];
 
-      if (xml_tag_eq(obj, item->key)) {
+      if (!item->keysize)
+        item->keysize = strlen(item->key);
+
+      if ((size_t)tagsize == item->keysize
+          && first == item->key[0]
+          && memcmp(obj->tag, item->key, item->keysize) == 0) {
         item->object = obj;
         if (i == start)
           start++;

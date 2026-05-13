@@ -23,7 +23,9 @@ xmla_i32(const xml_attr_t * __restrict attr, int32_t defaultValue) {
   if (!attr || !attr->val)
     return defaultValue;
 
-  return (int32_t)strtol(attr->val, NULL, 10);
+  return (int32_t)xml__parse_int64(attr->val,
+                                   attr->val + attr->valsize,
+                                   defaultValue);
 }
 
 /*!
@@ -39,7 +41,9 @@ xmla_u32(const xml_attr_t * __restrict attr, uint32_t defaultValue) {
   if (!attr || !attr->val)
     return defaultValue;
 
-  return (uint32_t)strtoul(attr->val, NULL, 10);
+  return (uint32_t)xml__parse_uint64(attr->val,
+                                     attr->val + attr->valsize,
+                                     defaultValue);
 }
 
 /*!
@@ -55,7 +59,9 @@ xmla_i64(const xml_attr_t * __restrict attr, int64_t defaultValue) {
   if (!attr || !attr->val)
     return defaultValue;
 
-  return strtoll(attr->val, NULL, 10);
+  return xml__parse_int64(attr->val,
+                          attr->val + attr->valsize,
+                          defaultValue);
 }
 
 /*!
@@ -71,7 +77,9 @@ xmla_u64(const xml_attr_t * __restrict attr, uint64_t defaultValue) {
   if (!attr || !attr->val)
     return defaultValue;
 
-  return strtoull(attr->val, NULL, 10);
+  return xml__parse_uint64(attr->val,
+                           attr->val + attr->valsize,
+                           defaultValue);
 }
 
 /*!
@@ -87,7 +95,9 @@ xmla_float(const xml_attr_t * __restrict attr, float defaultValue) {
   if (!attr || !attr->val)
     return defaultValue;
 
-  return strtof(attr->val, NULL);
+  return (float)xml__parse_double(attr->val,
+                                  attr->val + attr->valsize,
+                                  defaultValue);
 }
 
 /*!
@@ -103,7 +113,9 @@ xmla_double(const xml_attr_t * __restrict attr, double defaultValue) {
   if (!attr || !attr->val)
     return defaultValue;
 
-  return strtod(attr->val, NULL);
+  return xml__parse_double(attr->val,
+                           attr->val + attr->valsize,
+                           defaultValue);
 }
 
 /*!
