@@ -282,24 +282,15 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             attr->name = end = p;
             
             if (foundQuote) {
-              while (c != quote) {
-                if (c == '\0')
-                  goto err;
-                
-                /* espace */
-                if (c != '\\') {
-                  if (c != ' ' && c != '\r' && c != '\n' && c != '\t')
-                    end = p + 1;
-                } else {
-                  /* c = *++p; */
-                  ++p;
-                }
-                
-                c = *++p;
-              }
-              
-              /* skip trailing quote */
-              c = *++p;
+              char *quoteEnd;
+
+              quoteEnd = xml__find_quote(p, quote);
+              if (!quoteEnd)
+                goto err;
+
+              end = xml__rtrim_ascii(p, quoteEnd);
+              p   = quoteEnd + 1;
+              c   = *p;
             } else {
               while (c != '=') {
                 if (c == '\0')
@@ -340,25 +331,14 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             attr->val = end = p;
             
             if (foundQuote) {
-              while (c != quote) {
-                if (c == '\0')
-                  goto err;
-                
-                /* espace */
-                if (c != '\\') {
-                  if (c != ' ' && c != '\r' && c != '\n' && c != '\t')
-                    end = p + 1;
-                } else {
-                  /* c = *++p; */
-                  ++p;
-                }
-                
-                c = *++p;
-              }
-              
-              /* skip trailing quote */
-              /* c = *++p; */
-              ++p;
+              char *quoteEnd;
+
+              quoteEnd = xml__find_quote(p, quote);
+              if (!quoteEnd)
+                goto err;
+
+              end = xml__rtrim_ascii(p, quoteEnd);
+              p   = quoteEnd + 1;
             } else {
               while (c != '>' && c != '/') {
                 if (c == '\0')
@@ -405,11 +385,9 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             val->parent = obj;
             val->val    = (void *)s;
 
-            while (c != '<') {
-              if (c == '\0')
-                goto err;
-              c = *++p;
-            }
+            p = strchr(p, '<');
+            if (!p)
+              goto err;
             
             val->valsize = (int)(p - (char *)s);
             p--;

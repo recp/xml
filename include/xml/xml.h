@@ -93,6 +93,30 @@ XML_INLINE
 xml_attr_t*
 xmla(const xml_t * __restrict object, const char * __restrict name);
 
+XML_INLINE
+xml_attr_t*
+xmla_sz(const xml_t * __restrict object,
+        const char  * __restrict name,
+        size_t                   namesize);
+
+XML_INLINE
+xml_attr_t*
+xmla_packed4(const xml_t * __restrict object,
+             uint32_t                 packed,
+             size_t                   namesize);
+
+XML_INLINE
+xml_attr_t*
+xmla_packed8(const xml_t * __restrict object,
+             uint64_t                 packed,
+             size_t                   namesize);
+
+XML_INLINE
+xml_attr_t*
+xmla_packed(const xml_t * __restrict object,
+            uint64_t                 packed,
+            size_t                   namesize);
+
 /*!
 * @brief get an child element by name for given XML element
 *
@@ -104,6 +128,30 @@ XML_INLINE
 xml_t*
 xml_elem(const xml_t * __restrict object, const char * __restrict name);
 
+XML_INLINE
+xml_t*
+xml_elem_sz(const xml_t * __restrict object,
+            const char  * __restrict name,
+            size_t                   namesize);
+
+XML_INLINE
+xml_t*
+xml_elem_packed4(const xml_t * __restrict object,
+                 uint32_t                 packed,
+                 size_t                   namesize);
+
+XML_INLINE
+xml_t*
+xml_elem_packed8(const xml_t * __restrict object,
+                 uint64_t                 packed,
+                 size_t                   namesize);
+
+XML_INLINE
+xml_t*
+xml_elem_packed(const xml_t * __restrict object,
+                uint64_t                 packed,
+                size_t                   namesize);
+
 /*!
 * @brief get an child element by name for given XML element
 *
@@ -114,6 +162,30 @@ xml_elem(const xml_t * __restrict object, const char * __restrict name);
 XML_INLINE
 xml_t*
 xml_elem_next(const xml_t * __restrict current, const char * __restrict name);
+
+XML_INLINE
+xml_t*
+xml_elem_next_sz(const xml_t * __restrict current,
+                 const char  * __restrict name,
+                 size_t                   namesize);
+
+XML_INLINE
+xml_t*
+xml_elem_next_packed4(const xml_t * __restrict current,
+                      uint32_t                 packed,
+                      size_t                   namesize);
+
+XML_INLINE
+xml_t*
+xml_elem_next_packed8(const xml_t * __restrict current,
+                      uint64_t                 packed,
+                      size_t                   namesize);
+
+XML_INLINE
+xml_t*
+xml_elem_next_packed(const xml_t * __restrict current,
+                     uint64_t                 packed,
+                     size_t                   namesize);
 
 #include "impl/impl_parse.h"
 #include "impl/impl_common.h"

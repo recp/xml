@@ -310,6 +310,48 @@ xml_tag_eqsz(const xml_t * __restrict obj,
   return xml__bytes_eq(str, obj->tag, strsize);
 }
 
+XML_INLINE
+bool
+xml_tag_eq_packed4(const xml_t * __restrict obj,
+                   uint32_t                 packed,
+                   size_t                   strsize) {
+  if (!obj || !obj->tag)
+    return false;
+
+  return xml__bytes_eq_packed4(obj->tag,
+                               (size_t)obj->tagsize,
+                               packed,
+                               strsize);
+}
+
+XML_INLINE
+bool
+xml_tag_eq_packed8(const xml_t * __restrict obj,
+                   uint64_t                 packed,
+                   size_t                   strsize) {
+  if (!obj || !obj->tag)
+    return false;
+
+  return xml__bytes_eq_packed8(obj->tag,
+                               (size_t)obj->tagsize,
+                               packed,
+                               strsize);
+}
+
+XML_INLINE
+bool
+xml_tag_eq_packed(const xml_t * __restrict obj,
+                  uint64_t                 packed,
+                  size_t                   strsize) {
+  if (!obj || !obj->tag)
+    return false;
+
+  return xml__bytes_eq_packed(obj->tag,
+                              (size_t)obj->tagsize,
+                              packed,
+                              strsize);
+}
+
 /*!
 * @brief compares xml tag with a string and like strncmp.
 *
@@ -390,6 +432,48 @@ xml_val_eqsz(const xml_t * __restrict obj,
     return false;
 
   return xml__bytes_eq(str, obj->val, strsize);
+}
+
+XML_INLINE
+bool
+xml_val_eq_packed4(const xml_t * __restrict obj,
+                   uint32_t                 packed,
+                   size_t                   strsize) {
+  if (!obj || !obj->val)
+    return false;
+
+  return xml__bytes_eq_packed4(obj->val,
+                               (size_t)obj->valsize,
+                               packed,
+                               strsize);
+}
+
+XML_INLINE
+bool
+xml_val_eq_packed8(const xml_t * __restrict obj,
+                   uint64_t                 packed,
+                   size_t                   strsize) {
+  if (!obj || !obj->val)
+    return false;
+
+  return xml__bytes_eq_packed8(obj->val,
+                               (size_t)obj->valsize,
+                               packed,
+                               strsize);
+}
+
+XML_INLINE
+bool
+xml_val_eq_packed(const xml_t * __restrict obj,
+                  uint64_t                 packed,
+                  size_t                   strsize) {
+  if (!obj || !obj->val)
+    return false;
+
+  return xml__bytes_eq_packed(obj->val,
+                              (size_t)obj->valsize,
+                              packed,
+                              strsize);
 }
 
 #endif /* xml_util_h */
