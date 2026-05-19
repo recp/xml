@@ -19,7 +19,7 @@ typedef struct xml_mem_t {
   char              data[];
 } xml_mem_t;
 
-#define XML_MEM_PAGE (32768 - sizeof(xml_mem_t)) /* 32K */
+#define XML_MEM_PAGE (65536 - sizeof(xml_mem_t)) /* 64K */
 
 XML_INLINE
 void*
