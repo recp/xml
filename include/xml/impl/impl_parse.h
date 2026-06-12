@@ -146,7 +146,6 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             c = *++p;
           }
 
-          ++p;
           pos = 0;
         }
         break;
