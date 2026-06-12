@@ -156,6 +156,28 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             /* end xml tag */
             tag = obj->tag;
             c   = *++p;
+
+            if (sepPrefixes && obj->prefix && obj->prefixsize > 0) {
+              const char *prefix;
+              uint32_t    prefixsize;
+
+              prefix     = obj->prefix;
+              prefixsize = obj->prefixsize;
+              do {
+                if (c == '\0')
+                  goto err;
+
+                if (c != *prefix++)
+                  goto err;
+
+                c = *++p;
+              } while (--prefixsize > 0);
+
+              if (c != ':')
+                goto err;
+
+              c = *++p;
+            }
             
             do {
               if (c == '\0')
