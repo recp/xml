@@ -10,6 +10,18 @@
 
 #include "common.h"
 
+XML_INLINE
+const char*
+xml__value_begin(const xml_t * __restrict obj) {
+  return (const char *)obj->val;
+}
+
+XML_INLINE
+const char*
+xml__value_end(const xml_t * __restrict obj) {
+  return xml__value_begin(obj) + obj->valsize;
+}
+
 /*!
  * @brief return xml object from value
  */
@@ -133,8 +145,8 @@ xml_i32(const xml_t * __restrict obj, int32_t defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return (int32_t)xml__parse_int64(v->val,
-                                   v->val + v->valsize,
+  return (int32_t)xml__parse_int64(xml__value_begin(v),
+                                   xml__value_end(v),
                                    defaultValue);
 }
 
@@ -153,8 +165,8 @@ xml_u32(const xml_t * __restrict obj, uint32_t defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return (uint32_t)xml__parse_uint64(v->val,
-                                     v->val + v->valsize,
+  return (uint32_t)xml__parse_uint64(xml__value_begin(v),
+                                     xml__value_end(v),
                                      defaultValue);
 }
 
@@ -173,8 +185,8 @@ xml_i64(const xml_t * __restrict obj, int64_t defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return xml__parse_int64(v->val,
-                          v->val + v->valsize,
+  return xml__parse_int64(xml__value_begin(v),
+                          xml__value_end(v),
                           defaultValue);
 }
 
@@ -193,8 +205,8 @@ xml_u64(const xml_t * __restrict obj, uint64_t defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return xml__parse_uint64(v->val,
-                           v->val + v->valsize,
+  return xml__parse_uint64(xml__value_begin(v),
+                           xml__value_end(v),
                            defaultValue);
 }
 
@@ -213,8 +225,8 @@ xml_float(const xml_t * __restrict obj, float defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return (float)xml__parse_double(v->val,
-                                  v->val + v->valsize,
+  return (float)xml__parse_double(xml__value_begin(v),
+                                  xml__value_end(v),
                                   defaultValue);
 }
 
@@ -233,8 +245,8 @@ xml_double(const xml_t * __restrict obj, double defaultValue) {
   if (!(v = xmls(obj)))
     return defaultValue;
 
-  return xml__parse_double(v->val,
-                           v->val + v->valsize,
+  return xml__parse_double(xml__value_begin(v),
+                           xml__value_end(v),
                            defaultValue);
 }
 
