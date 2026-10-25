@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.11...3.16)
-project(xml VERSION 0.1.0 LANGUAGES C)
+project(xml VERSION 0.1.1 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(DEFAULT_BUILD_TYPE "Release")
