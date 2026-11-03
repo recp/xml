@@ -21,10 +21,12 @@
   <ItemGroup>
     <ClCompile Include="..\src\xml.c" />
     <ClCompile Include="..\src\decode.c" />
+    <ClCompile Include="..\src\name.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\xml\call\xml.h" />
     <ClInclude Include="..\include\xml\call\decode.h" />
+    <ClInclude Include="..\include\xml\call\name.h" />
     <ClInclude Include="..\include\xml\common.h" />
     <ClInclude Include="..\include\xml\impl\impl_common.h" />
     <ClInclude Include="..\include\xml\impl\impl_mem.h" />
@@ -32,6 +34,7 @@
     <ClInclude Include="..\include\xml\impl\impl_objmap.h" />
     <ClInclude Include="..\include\xml\xml.h" />
     <ClInclude Include="..\include\xml\decode.h" />
+    <ClInclude Include="..\include\xml\name.h" />
     <ClInclude Include="..\include\xml\objmap.h" />
     <ClInclude Include="..\include\xml\print.h" />
     <ClInclude Include="..\include\xml\util.h" />

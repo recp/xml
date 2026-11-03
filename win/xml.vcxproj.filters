@@ -24,6 +24,9 @@
     <ClCompile Include="..\src\decode.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\name.c">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\xml\common.h">
@@ -33,6 +36,9 @@
       <Filter>include\xml</Filter>
     </ClInclude>
     <ClInclude Include="..\include\xml\decode.h">
+      <Filter>include\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\name.h">
       <Filter>include\xml</Filter>
     </ClInclude>
     <ClInclude Include="..\include\xml\print.h">
@@ -54,6 +60,9 @@
       <Filter>include\xml\call</Filter>
     </ClInclude>
     <ClInclude Include="..\include\xml\call\decode.h">
+      <Filter>include\xml\call</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\call\name.h">
       <Filter>include\xml\call</Filter>
     </ClInclude>
     <ClInclude Include="..\include\xml\impl\impl_common.h">

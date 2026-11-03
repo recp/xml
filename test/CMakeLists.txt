@@ -22,6 +22,10 @@ add_executable(xml-decode-test decode.c)
 target_link_libraries(xml-decode-test PRIVATE xml)
 add_test(NAME value-decoding COMMAND xml-decode-test)
 
+add_executable(xml-name-test name.c)
+target_link_libraries(xml-name-test PRIVATE xml)
+add_test(NAME name-validation COMMAND xml-name-test)
+
 find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
   add_test(NAME decode-reference
