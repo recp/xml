@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.11...3.16)
-project(xml VERSION 0.1.1 LANGUAGES C)
+project(xml VERSION 0.2.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(DEFAULT_BUILD_TYPE "Release")
@@ -8,6 +8,7 @@ set(XML_BUILD)
 option(XML_SHARED "Shared build" ON)
 option(XML_STATIC "Static build" OFF)
 option(XML_USE_C99 "" OFF)
+option(XML_USE_TEST "Build parser regression tests" OFF)
 
 if(NOT XML_STATIC AND XML_SHARED)
   set(XML_BUILD SHARED)
@@ -44,7 +45,7 @@ add_library(${PROJECT_NAME} ${XML_BUILD} src/xml.c)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
                              VERSION ${PROJECT_VERSION}
-                           SOVERSION ${PROJECT_VERSION_MAJOR})
+                           SOVERSION 1)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC 

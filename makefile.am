@@ -15,7 +15,7 @@ AM_CFLAGS = -Wall \
             -fstrict-aliasing
 
 lib_LTLIBRARIES = libxml.la
-libxml_la_LDFLAGS = -no-undefined -version-info 0:1:0
+libxml_la_LDFLAGS = -no-undefined -version-info 1:0:0
 
 xmldir=$(includedir)/xml
 xml_HEADERS = include/xml/version.h \

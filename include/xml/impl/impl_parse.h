@@ -29,14 +29,20 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
   const char  *tag, *s;
   xml_t        tmproot;
   xml_position pos;
+  uint32_t     remaining;
   char        *p, *end, c, quote;
-  bool         foundQuote, reverse, sepPrefixes, readonly;
+  bool         foundQuote, reverse, sepPrefixes, readonly, complete = false;
   
   if (!contents || (c = *contents) == '\0')
     return NULL;
   
-  doc            = calloc(1, sizeof(*doc));
-  doc->memroot   = calloc(1, sizeof(xml_mem_t) + XML_MEM_PAGE);
+  if (!(doc = calloc(1, sizeof(*doc))))
+    return NULL;
+
+  if (!(doc->memroot = calloc(1, sizeof(xml_mem_t) + XML_MEM_PAGE))) {
+    free(doc);
+    return NULL;
+  }
   p              = (char *)contents;
 
   memset(&tmproot, 0, sizeof(tmproot));
@@ -77,7 +83,7 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
         } while (c == ' ' || c == '\r' || c == '\n' || c == '\t');
 
         if (c == '\0')
-          goto err;
+          goto done;
 
         goto again;
       case '<': { /* TODO: what if we get << or <<!--  ->TAG>... here? */
@@ -178,15 +184,19 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
               c = *++p;
             }
             
+            remaining = obj->tagsize;
             do {
               if (c == '\0')
                 goto err;
               
-              if (!tag || c != *tag++)
+              if (!tag || !remaining || c != *tag++)
                 goto err;
-              
+
+              remaining--;
               c = *++p;
-            } while (c != ' ' && c != '>');
+            } while (!xml__ascii_space(c) && c != '>');
+            if (remaining)
+              goto err;
             
             s = p + 1;
             p--;
@@ -215,6 +225,7 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
           obj    = parent;
           parent = parent->parent;
           pos    = endel;
+          complete = parent == NULL;
         } else {
           pos = beginel;
         }
@@ -228,9 +239,15 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
       default: {
         switch (pos) {
           case begintag:
+            if (complete)
+              goto err;
+
             /* switch parent */
             parent        = obj;
             obj           = xml__impl_calloc(doc, sizeof(xml_t));
+            if (!obj)
+              goto err;
+
             obj->type     = XML_ELEMENT;
             obj->readonly = readonly;
             obj->reverse  = reverse;
@@ -257,15 +274,21 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
               if (sepPrefixes) {
                 if (c == ':') {
                   obj->prefix     = obj->tag;
-                  obj->prefixsize = (uint32_t)(p - obj->prefix);
+                  if ((size_t)(p - obj->prefix) > UINT16_MAX)
+                    goto err;
+
+                  obj->prefixsize = (uint16_t)(p - obj->prefix);
                   obj->tag        = p + 1;
                 }
               }
 
               c = *++p;
-            } while (c != ' ' && c != '/' && c != '>');
+            } while (!xml__ascii_space(c) && c != '/' && c != '>');
             
-            obj->tagsize = (int)(p - obj->tag);
+            if ((size_t)(p - obj->tag) > UINT16_MAX)
+              goto err;
+
+            obj->tagsize = (uint16_t)(p - obj->tag);
             
             if (c == '>') {
               pos = beginel;
@@ -292,6 +315,8 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             break;
           case beginattr:
             attr = xml__impl_calloc(doc, sizeof(xml_attr_t));
+            if (!attr)
+              goto err;
             
             /* attrib key */
             if ((foundQuote = (c == '"' || c == '\'' || c == '`'))) {
@@ -324,7 +349,10 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
               }
             }
             
-            attr->namesize = (int)(end - attr->name);
+            if ((size_t)(end - attr->name) > UINT16_MAX)
+              goto err;
+
+            attr->namesize = (uint16_t)(end - attr->name);
             if (!readonly)
               *end = '\0';
 
@@ -342,6 +370,8 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             
             /* skip trailing equal */
             c = *++p;
+            while (xml__ascii_space(c))
+              c = *++p;
 
             if ((foundQuote = (c == '"' || c == '\'' || c == '`'))) {
               quote          = c;
@@ -358,7 +388,7 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
               if (!quoteEnd)
                 goto err;
 
-              end = xml__rtrim_ascii(p, quoteEnd);
+              end = quoteEnd;
               p   = quoteEnd + 1;
             } else {
               while (c != '>' && c != '/') {
@@ -372,7 +402,10 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
               }
             }
             
-            attr->valsize = (int)(end - attr->val);
+            if ((size_t)(end - attr->val) > UINT32_MAX)
+              goto err;
+
+            attr->valsize = (uint32_t)(end - attr->val);
             if (!readonly)
               *end = '\0';
 
@@ -385,7 +418,12 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             goto again;
           case beginel:
           case endel:
+            if (obj == &tmproot)
+              goto err;
+
             val           = xml__impl_calloc(doc, sizeof(xml_t));
+            if (!val)
+              goto err;
             val->type     = XML_STRING;
             
             val->readonly = readonly;
@@ -410,21 +448,23 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
             if (!p)
               goto err;
             
-            val->valsize = (int)(p - (char *)s);
+            if ((size_t)(p - (char *)s) > UINT32_MAX)
+              goto err;
+
+            val->valsize = (uint32_t)(p - (char *)s);
             p--;
             break;
           default:
-            break;
+            goto err;
         }
         break;
       } /* switch->default */
     } /* switch */
   } while ((c = *p) != '\0' && (c = *++p) != '\0');
   
-err:
-  
-  if (attr)
-    memset(attr, 0, sizeof(xml_attr_t));
+done:
+  if (!complete || obj != &tmproot || parent || pos == begintag || pos == endtag || pos == beginattr)
+    goto err;
 
   if (tmproot.val) {
     ((xml_t *)tmproot.val)->parent = NULL;
@@ -433,6 +473,10 @@ err:
   
   doc->root = tmproot.val;
   return doc;
+
+err:
+  xml_free(doc);
+  return NULL;
 }
 
 #endif /* xml_impl_parse_h */

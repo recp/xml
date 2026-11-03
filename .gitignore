@@ -122,3 +122,4 @@ win/Debug
 xml_test/*
 main.c
 build
+build-*/

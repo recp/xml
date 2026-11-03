@@ -9,7 +9,7 @@
 #define xml_version_h
 
 #define XML_VERSION_MAJOR 0
-#define XML_VERSION_MINOR 1
-#define XML_VERSION_PATCH 1
+#define XML_VERSION_MINOR 2
+#define XML_VERSION_PATCH 0
 
 #endif /* xml_version_h */

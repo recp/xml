@@ -31,8 +31,11 @@ xml__impl_calloc(xml_doc_t * __restrict doc, size_t size) {
   mem         = doc->memroot;
   sizeToAlloc = (XML_MEM_PAGE < size) ? size : XML_MEM_PAGE;
   
-  if (mem->capacity < (mem->size + size)) {
-    mem           = calloc(1, sizeof(*mem) + sizeToAlloc);
+  if (size > mem->capacity - mem->size) {
+    if (sizeToAlloc > SIZE_MAX - sizeof(*mem)
+        || !(mem = calloc(1, sizeof(*mem) + sizeToAlloc)))
+      return NULL;
+
     mem->capacity = sizeToAlloc;
     mem->next     = doc->memroot;
     doc->memroot  = mem;

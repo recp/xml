@@ -70,6 +70,7 @@ typedef enum xml_options_t {
  * @param[in] options  options use XML_DEFAULTS or XML_NONE for default
  *
  * @return xml document which contains xml object as root object
+ *         NULL on detected parse/size/allocation failure; no partial root.
  */
 XML_INLINE
 xml_doc_t*

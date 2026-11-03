@@ -50,7 +50,7 @@ typedef struct xml_attr_t {
   struct xml_attr_t *next;
   const char        *name;
   const char        *val;
-  uint16_t           valsize;
+  uint32_t           valsize; /* checked byte length, up to UINT32_MAX */
   uint16_t           namesize;
   uint8_t            namequote;
   uint8_t            valquote;
@@ -117,19 +117,10 @@ xml__quote_escaped(const char * __restrict begin,
 }
 
 XML_INLINE
-char *
+char*
 xml__find_quote(char * __restrict p,
                 char              quote) {
-  char *found;
-
-  while ((found = strchr(p, quote))) {
-    if (!xml__quote_escaped(p, found))
-      return found;
-
-    p = found + 1;
-  }
-
-  return NULL;
+  return strchr(p, quote);
 }
 
 XML_INLINE

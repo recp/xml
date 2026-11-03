@@ -16,6 +16,9 @@ void
 xml_free(xml_doc_t * __restrict doc) {
   xml_mem_t *mem, *tofree;
 
+  if (!doc)
+    return;
+
   mem = doc->memroot;
   while (mem) {
     tofree = mem;

@@ -7,7 +7,7 @@
 #*****************************************************************************
 
 AC_PREREQ([2.69])
-AC_INIT([xml], [0.1.1], [info@recp.me])
+AC_INIT([xml], [0.2.0], [info@recp.me])
 AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 
 AC_CONFIG_MACRO_DIR([m4])
