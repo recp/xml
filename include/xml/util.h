@@ -263,7 +263,7 @@ xml_bool(const xml_t * __restrict obj, int defaultValue) {
   const xml_t *v;
   char         first;
 
-  if (!(v = xmls(obj)))
+  if (!(v = xmls(obj)) || !v->valsize)
     return defaultValue;
 
   first = *(char *)v->val;

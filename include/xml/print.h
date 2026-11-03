@@ -100,7 +100,12 @@ xml_print_ex(FILE  * __restrict ostream,
         break;
       }
       case XML_STRING:
-        fprintf(ostream, "%.*s", xml->valsize, xml->val);
+        if (xml->cdata)
+          fputs("<![CDATA[", ostream);
+        if (xml->valsize)
+          fwrite(xml->val, 1, xml->valsize, ostream);
+        if (xml->cdata)
+          fputs("]]>", ostream);
         snode = 1;
         break;
       default:

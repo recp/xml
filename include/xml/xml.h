@@ -27,6 +27,16 @@ typedef enum xml_options_t {
    */ 
   XML_READONLY = 1 << 2,
 
+  /*
+   * retain all character data inside elements, including whitespace-only spans.
+   * CDATA is an XML_STRING with cdata set. Values still borrow the input and
+   * retain raw entity references and line endings; no decoding/normalization.
+   * Comments and processing instructions are skipped without entering text.
+   * Unsupported declarations (including DTDs) are rejected in this mode.
+   * This is not full XML validation or a lossless markup serializer.
+   */
+  XML_PRESERVE_TEXT = 1 << 3,
+
   /* --------------------- DEFAULT OPTIONS ------------------------------------
    *
    * Option 1: NULL Terminator for Strings

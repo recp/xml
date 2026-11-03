@@ -69,6 +69,7 @@ typedef struct xml_t {
   xml_type_t         type:16;
   bool               readonly:1;
   bool               reverse:1;
+  bool               cdata:1; /* XML_STRING payload is literal CDATA */
 } xml_t;
 
 typedef struct xml_doc_t {

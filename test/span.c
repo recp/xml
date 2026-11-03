@@ -23,6 +23,7 @@ same_tree(const xml_t *a, const xml_t *b) {
 
   for (; a && b; a = a->next, b = b->next) {
     if (a->type != b->type || a->readonly != b->readonly || a->reverse != b->reverse
+        || a->cdata != b->cdata
         || a->tagsize != b->tagsize || a->prefixsize != b->prefixsize
         || a->valsize != b->valsize || !!a->parent != !!b->parent)
       return false;
@@ -112,7 +113,7 @@ errors(void) {
     CHECK(error.status == XML_PARSE_INVALID_ARGUMENT && error.offset == 0);
     CHECK(!parse(compiled, "<r/>", SIZE_MAX, XML_READONLY, &error));
     CHECK(error.status == XML_PARSE_INVALID_ARGUMENT && error.offset == 0);
-    CHECK(!parse(compiled, "<r/>", 4, (xml_options_t)8, &error));
+    CHECK(!parse(compiled, "<r/>", 4, (xml_options_t)16, &error));
     CHECK(error.status == XML_PARSE_INVALID_ARGUMENT && error.offset == 0);
     CHECK(!parse(compiled, "", 0, XML_READONLY, &error));
     CHECK(error.status == XML_PARSE_INVALID_DATA && error.offset == 0);

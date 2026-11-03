@@ -9,3 +9,7 @@ add_test(NAME allocation-failures COMMAND xml-alloc-test)
 add_executable(xml-span-test span.c)
 target_link_libraries(xml-span-test PRIVATE xml)
 add_test(NAME bounded-input COMMAND xml-span-test)
+
+add_executable(xml-text-test text.c)
+target_link_libraries(xml-text-test PRIVATE xml)
+add_test(NAME text-preservation COMMAND xml-text-test)
