@@ -39,17 +39,12 @@ test_free(void *pointer) {
 #undef calloc
 #undef free
 
-int
-main(void) {
-  char       source[12000];
+static int
+check_failures(const char *source) {
   xml_doc_t *doc;
   size_t     i, allocationCount;
 
-  memcpy(source, "<r>", 3u);
-  for (i = 0u; i < 2000u; i++)
-    memcpy(source + 3u + i * 4u, "<x/>", 4u);
-
-  memcpy(source + 8003u, "</r>", 5u);
+  calls = failAt = 0u;
   doc = xml_parse(source, XML_READONLY);
   if (!doc)
     return 1;
@@ -68,4 +63,36 @@ main(void) {
   }
   printf("all %zu document/page allocation failures release prior pages: pass\n", allocationCount);
   return 0;
+}
+
+int
+main(void) {
+  char   source[32768];
+  size_t i, offset;
+
+  memcpy(source, "<r>", 3u);
+  for (i = 0u; i < 2000u; i++)
+    memcpy(source + 3u + i * 4u, "<x/>", 4u);
+
+  memcpy(source + 8003u, "</r>", 5u);
+  if (check_failures(source))
+    return 1;
+
+  /* fill the page with attributes so failure occurs at the attribute site. */
+  memcpy(source, "<r ", 3u);
+  offset = 3u;
+  for (i = 0u; i < 2046u; i++)
+    offset += (size_t)snprintf(source + offset, sizeof(source) - offset, "a%zu='x' ", i);
+
+  memcpy(source + offset, "/>", 3u);
+  if (check_failures(source))
+    return 2;
+
+  /* leave less than one text token after completing the child elements. */
+  memcpy(source, "<r>", 3u);
+  for (i = 0u; i < 1022u; i++)
+    memcpy(source + 3u + i * 4u, "<x/>", 4u);
+
+  memcpy(source + 4091u, "text</r>", 9u);
+  return check_failures(source);
 }
