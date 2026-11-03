@@ -52,7 +52,7 @@ check_failures(const char *source) {
     return 1;
 
   for (span = 0; span < 2; span++) {
-    for (mode = 0; mode < 8; mode++) {
+    for (mode = 0; mode < 16; mode++) {
       memcpy(copy, source, size + 1);
       calls = failAt = 0;
       doc = span ? xml_parse_span(copy, size, (xml_options_t)mode, &error)
@@ -83,7 +83,7 @@ check_failures(const char *source) {
     }
   }
   free(copy);
-  printf("all %zu allocation failures, 8 modes, both APIs release prior pages: pass\n", allocationCount);
+  printf("all %zu allocation failures, 16 modes, both APIs release prior pages: pass\n", allocationCount);
   return 0;
 }
 
@@ -116,5 +116,13 @@ main(void) {
     memcpy(source + 3u + i * 4u, "<x/>", 4u);
 
   memcpy(source + 4091u, "text</r>", 9u);
+  if (check_failures(source))
+    return 3;
+
+  /* retained CDATA fills another token page in preserve mode. */
+  memcpy(source, "<r>", 3);
+  for (i = 0; i < 1500; i++)
+    memcpy(source + 3 + i * 13, "<![CDATA[x]]>", 13);
+  memcpy(source + 19503, "</r>", 5);
   return check_failures(source);
 }
