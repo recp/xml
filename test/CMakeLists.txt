@@ -31,4 +31,8 @@ if(Python3_Interpreter_FOUND)
   add_test(NAME decode-reference
            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/decode_reference.py"
                    $<TARGET_FILE:xml-decode-test>)
+  add_test(NAME name-reference
+           COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/name_reference.py"
+                   $<TARGET_FILE:xml-name-test>)
+  set_tests_properties(name-reference PROPERTIES SKIP_RETURN_CODE 77)
 endif()
