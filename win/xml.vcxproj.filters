@@ -21,12 +21,18 @@
     <ClCompile Include="..\src\xml.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\decode.c">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\xml\common.h">
       <Filter>include\xml</Filter>
     </ClInclude>
     <ClInclude Include="..\include\xml\xml.h">
+      <Filter>include\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\decode.h">
       <Filter>include\xml</Filter>
     </ClInclude>
     <ClInclude Include="..\include\xml\print.h">
@@ -45,6 +51,9 @@
       <Filter>include\xml</Filter>
     </ClInclude>
     <ClInclude Include="..\include\xml\call\xml.h">
+      <Filter>include\xml\call</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xml\call\decode.h">
       <Filter>include\xml\call</Filter>
     </ClInclude>
     <ClInclude Include="..\include\xml\impl\impl_common.h">

@@ -21,13 +21,15 @@ xmldir=$(includedir)/xml
 xml_HEADERS = include/xml/version.h \
                include/xml/common.h \
                include/xml/xml.h \
+               include/xml/decode.h \
                include/xml/util.h \
                include/xml/attrib.h \
                include/xml/print.h \
                include/xml/objmap.h
 
 xml_calldir=$(includedir)/xml/call
-xml_call_HEADERS = include/xml/call/xml.h
+xml_call_HEADERS = include/xml/call/xml.h \
+                   include/xml/call/decode.h
 
 xml_impldir=$(includedir)/xml/impl
 xml_impl_HEADERS = include/xml/impl/impl_mem.h \
@@ -36,4 +38,5 @@ xml_impl_HEADERS = include/xml/impl/impl_mem.h \
                    include/xml/impl/impl_objmap.h
 
 libxml_la_SOURCES=\
-    src/xml.c
+    src/xml.c \
+    src/decode.c
