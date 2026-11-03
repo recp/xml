@@ -41,27 +41,49 @@ test_free(void *pointer) {
 
 static int
 check_failures(const char *source) {
-  xml_doc_t *doc;
-  size_t     i, allocationCount;
+  xml_parse_error_t error;
+  xml_doc_t        *doc;
+  char             *copy;
+  size_t            i, size, allocationCount;
+  unsigned          span, mode;
 
-  calls = failAt = 0u;
-  doc = xml_parse(source, XML_READONLY);
-  if (!doc)
+  size = strlen(source);
+  if (!(copy = malloc(size + 1)))
     return 1;
 
-  allocationCount = calls;
-  xml_free(doc);
-  if (live)
-    return 2;
-
-  for (i = 1u; i <= allocationCount; i++) {
-    failAt = i;
-    calls = 0u;
-    doc = xml_parse(source, XML_READONLY);
-    if (doc || live)
-      return 3;
+  for (span = 0; span < 2; span++) {
+    for (mode = 0; mode < 8; mode++) {
+      memcpy(copy, source, size + 1);
+      calls = failAt = 0;
+      doc = span ? xml_parse_span(copy, size, (xml_options_t)mode, &error)
+                 : xml_parse(copy, (xml_options_t)mode);
+      if (!doc || (span && error.status != XML_PARSE_OK)) {
+        free(copy);
+        return 2;
+      }
+      allocationCount = calls;
+      xml_free(doc);
+      if (live) {
+        free(copy);
+        return 3;
+      }
+      for (i = 1; i <= allocationCount; i++) {
+        memcpy(copy, source, size + 1);
+        failAt = i;
+        calls = 0;
+        memset(&error, 0xff, sizeof(error));
+        doc = span ? xml_parse_span(copy, size, (xml_options_t)mode, &error)
+                   : xml_parse(copy, (xml_options_t)mode);
+        if (doc || live
+            || (span && (error.status != XML_PARSE_OUT_OF_MEMORY || error.offset > size))) {
+          free(copy);
+          return 4;
+        }
+      }
+    }
   }
-  printf("all %zu document/page allocation failures release prior pages: pass\n", allocationCount);
+  free(copy);
+  printf("all %zu allocation failures, 8 modes, both APIs release prior pages: pass\n", allocationCount);
   return 0;
 }
 
