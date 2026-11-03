@@ -119,10 +119,13 @@ xml__parse(const char        * __restrict contents,
 
         pos = begintag;
         
-        if (!readonly) {
-          *p = '\0';
+        /* advance bounded readonly cursors without revisiting this byte. */
+        if (!readonly || limit) {
+          if (!readonly)
+            *p = '\0';
+
           if ((c = xml__parse_char(++p, limit, 0)) != '\0')
-            goto again;;
+            goto again;
         }
         break;
       }
@@ -270,10 +273,12 @@ xml__parse(const char        * __restrict contents,
           pos = beginel;
         }
         
-        if (!readonly) {
-          *p = '\0';
+        if (!readonly || limit) {
+          if (!readonly)
+            *p = '\0';
+
           if ((c = xml__parse_char(++p, limit, 0)) != '\0')
-            goto again;;
+            goto again;
         }
         break;
       default: {
