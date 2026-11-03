@@ -102,13 +102,55 @@ lengths(void) {
 }
 
 static int
+tag_lengths(void) {
+  xml_doc_t *doc;
+  char      *source, *copy;
+  size_t     length, size;
+  unsigned   qualified, compiled, mode;
+
+  for (qualified = 0u; qualified < 2u; qualified++) {
+    length = qualified ? 2u * UINT16_MAX + 1u : UINT16_MAX;
+    size = 2u * length + 6u;
+    CHECK((source = malloc(size)) && (copy = malloc(size)));
+    source[0] = '<';
+    memset(source + 1u, 'a', length);
+    if (qualified)
+      source[UINT16_MAX + 1u] = ':';
+
+    memcpy(source + length + 1u, "></", 3u);
+    memcpy(source + length + 4u, source + 1u, length);
+    memcpy(source + 2u * length + 4u, ">", 2u);
+    for (compiled = 0u; compiled < 2u; compiled++) {
+      for (mode = 0u; mode < 8u; mode++) {
+        memcpy(copy, source, size);
+        doc = parse(compiled != 0u, copy, (xml_options_t)mode);
+        if (!qualified || (mode & XML_PREFIXES)) {
+          CHECK(doc && doc->root->tagsize == UINT16_MAX);
+          CHECK(!qualified || doc->root->prefixsize == UINT16_MAX);
+          xml_free(doc);
+        } else {
+          CHECK(!doc);
+        }
+        memcpy(copy, source, size);
+        copy[2u * length + 3u] = '\0';
+        CHECK(!parse(compiled != 0u, copy, (xml_options_t)mode));
+      }
+    }
+    free(copy);
+    free(source);
+  }
+  return 0;
+}
+
+static int
 errors(void) {
   const char *invalid[] = {"", " ", "<r>", "<r><x>", "<r><x></r>", "<root></roo>",
                            "<r></root>", "<r></r", "<r/><x/>", "<r/><", "junk<r/>",
-                           "<r/>junk<x/>", "<r x='unfinished>", "<r><!--unfinished"};
+                           "<r/>junk<x/>", "<r x='unfinished>", "<r><!--unfinished", "<r></rX>",
+                           "<x:r></x:>", "<x:r></x:s>", "<r></r trailing>"};
   const char *valid[] = {"<r/>", "<r></r>", "<r><x/></r> \n\t", "<!--p--><r/><!--e-->",
                          "<?xml version='1.0'?><r/>", "<r x = \"a \"/>", "<r\tx='a'/>",
-                         "<r x='backslash\\'/>", "<r x='&quot;'/>"};
+                         "<r x='backslash\\'/>", "<r x='&quot;'/>", "<x:r></x:r \t\r\n>"};
   const char *complete = "<r><x/></r>";
   xml_doc_t  *doc;
   char       *copy;
@@ -137,6 +179,12 @@ errors(void) {
         xml_free(doc);
         free(copy);
       }
+      if (mode & XML_PREFIXES) {
+        CHECK((copy = malloc(sizeof("<x:></x:>"))));
+        memcpy(copy, "<x:></x:>", sizeof("<x:></x:>"));
+        CHECK(!parse(compiled != 0u, copy, (xml_options_t)mode));
+        free(copy);
+      }
       for (i = 0u; i < strlen(complete); i++) {
         CHECK((copy = malloc(i + 1u)));
         memcpy(copy, complete, i);
@@ -153,7 +201,7 @@ errors(void) {
 
 int
 main(void) {
-  if (modes() || lengths() || errors())
+  if (modes() || lengths() || tag_lengths() || errors())
     return 1;
 
   puts("inline/compiled modes, long values, complete roots, XML quotes and whitespace: pass");
