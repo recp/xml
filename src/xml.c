@@ -56,6 +56,18 @@ xmlc_parse(const char * __restrict contents, xml_options_t options) {
 }
 
 XML_EXPORT
+xml_doc_t*
+xmlc_parse_span(const char        * __restrict contents,
+                size_t                        size,
+                xml_options_t                 options,
+                xml_parse_error_t            *error) {
+  if (options & XML_READONLY)
+    return xml_parse_span(contents, size, (xml_options_t)(options | XML_READONLY), error);
+
+  return xml_parse_span(contents, size, (xml_options_t)(options & ~XML_READONLY), error);
+}
+
+XML_EXPORT
 void
 xmlc_free(xml_doc_t * __restrict jsondoc) {
   xml_free(jsondoc);

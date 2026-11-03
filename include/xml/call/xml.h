@@ -41,6 +41,14 @@ XML_EXPORT
 xml_doc_t*
 xmlc_parse(const char * __restrict contents, xml_options_t options);
 
+/* same ownership, bounds and error contract as xml_parse_span(). */
+XML_EXPORT
+xml_doc_t*
+xmlc_parse_span(const char        * __restrict contents,
+                size_t                        size,
+                xml_options_t                 options,
+                xml_parse_error_t            *error);
+
 /*!
  * @brief frees xml document and its allocated memory
  */

@@ -47,6 +47,19 @@ typedef enum xml_options_t {
   XML_DEFAULTS = XML_PREFIXES
 } xml_options_t;
 
+typedef enum xml_parse_status_t {
+  XML_PARSE_OK = 0,
+  XML_PARSE_INVALID_ARGUMENT,
+  XML_PARSE_INVALID_DATA,
+  XML_PARSE_OUT_OF_MEMORY,
+  XML_PARSE_RANGE
+} xml_parse_status_t;
+
+typedef struct xml_parse_error_t {
+  xml_parse_status_t status;
+  size_t             offset;
+} xml_parse_error_t;
+
 /*!
  * @brief parse xml string
  *
@@ -75,6 +88,27 @@ typedef enum xml_options_t {
 XML_INLINE
 xml_doc_t*
 xml_parse(const char * __restrict contents, xml_options_t options);
+
+/*!
+ * @brief parse a borrowed XML byte span without a trailing null terminator
+ *
+ * size excludes any terminator; embedded null bytes are rejected. The caller
+ * keeps contents alive until xml_free(). Unless XML_READONLY is set, contents
+ * must be writable and may also be changed on failure, as with xml_parse().
+ * Token lengths, grammar and options otherwise follow xml_parse(); this is
+ * not a full XML conformance validator and does not impose resource budgets.
+ *
+ * error is optional. On success it reports XML_PARSE_OK and offset == size.
+ * On failure it reports a status and a byte cursor in [0, size]; argument and
+ * initial allocation errors use offset zero. No partial document is returned.
+ * size must fit PTRDIFF_MAX, and options must contain only known option bits.
+ */
+XML_INLINE
+xml_doc_t*
+xml_parse_span(const char        * __restrict contents,
+               size_t                        size,
+               xml_options_t                 options,
+               xml_parse_error_t            *error);
 
 /*!
  * @brief frees xml document and its allocated memory
