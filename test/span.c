@@ -17,6 +17,41 @@ parse(bool compiled, const char *text, size_t size,
                   : xml_parse_span(text, size, options, error);
 }
 
+static bool
+same_tree(const xml_t *a, const xml_t *b) {
+  const xml_attr_t *left, *right;
+
+  for (; a && b; a = a->next, b = b->next) {
+    if (a->type != b->type || a->readonly != b->readonly || a->reverse != b->reverse
+        || a->tagsize != b->tagsize || a->prefixsize != b->prefixsize
+        || a->valsize != b->valsize || !!a->parent != !!b->parent)
+      return false;
+
+    if ((a->tagsize && memcmp(a->tag, b->tag, a->tagsize))
+        || (a->prefixsize && memcmp(a->prefix, b->prefix, a->prefixsize)))
+      return false;
+
+    for (left = a->attr, right = b->attr; left && right;
+         left = left->next, right = right->next) {
+      if (left->namesize != right->namesize || left->valsize != right->valsize
+          || left->namequote != right->namequote || left->valquote != right->valquote
+          || (left->namesize && memcmp(left->name, right->name, left->namesize))
+          || (left->valsize && memcmp(left->val, right->val, left->valsize)))
+        return false;
+    }
+    if (left || right)
+      return false;
+
+    if (a->type == XML_ELEMENT) {
+      if (!same_tree(xml_xml(a), xml_xml(b)))
+        return false;
+    } else if (a->valsize && memcmp(a->val, b->val, a->valsize)) {
+      return false;
+    }
+  }
+  return !a && !b;
+}
+
 static int
 boundaries(void) {
   const char *sources[] = {
@@ -126,7 +161,8 @@ static int
 mutations(void) {
   const char *sources[] = {
     "<r/>", "<x:r a='text'>value</x:r>", "<r><!--x--></r>",
-    "<r><![CDATA[x]]></r>", "<?x?><r><c/></r>", "<r a=unquoted/>"
+    "<r><![CDATA[x]]></r>", "<?x?><r><c/></r>", "<r a=unquoted/>",
+    "<r>lead<a/>middle<b>deep<c/>tail</b>end</r>"
   };
   const char        changes[] = "<>/'\"`!?[]= :&\n\t";
   xml_parse_error_t error;
@@ -149,6 +185,7 @@ mutations(void) {
             old = xml_parse(terminated, (xml_options_t)mode);
             doc = parse(compiled, span, size, (xml_options_t)mode, &error);
             CHECK((old != NULL) == (doc != NULL));
+            CHECK(same_tree(old ? old->root : NULL, doc ? doc->root : NULL));
             CHECK(error.status == (doc ? XML_PARSE_OK : XML_PARSE_INVALID_DATA));
             CHECK(error.offset <= size);
             xml_free(old);
