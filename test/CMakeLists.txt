@@ -21,3 +21,10 @@ add_test(NAME resource-limits COMMAND xml-limits-test)
 add_executable(xml-decode-test decode.c)
 target_link_libraries(xml-decode-test PRIVATE xml)
 add_test(NAME value-decoding COMMAND xml-decode-test)
+
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+  add_test(NAME decode-reference
+           COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/decode_reference.py"
+                   $<TARGET_FILE:xml-decode-test>)
+endif()
