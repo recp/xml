@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static size_t calls, failAt, live;
+static size_t calls, failAt, live, bytes;
 
 static void*
 test_calloc(size_t count, size_t size) {
@@ -19,8 +19,10 @@ test_calloc(size_t count, size_t size) {
     return NULL;
 
   result = calloc(count, size);
-  if (result)
+  if (result) {
     live++;
+    bytes += count * size;
+  }
 
   return result;
 }
@@ -39,6 +41,67 @@ test_free(void *pointer) {
 #undef calloc
 #undef free
 
+static xml_doc_t*
+parse(unsigned api, char *copy, size_t size, unsigned mode, xml_parse_error_t *error) {
+  const xml_parse_limits_t limits = {SIZE_MAX, SIZE_MAX, SIZE_MAX, SIZE_MAX};
+
+  switch (api) {
+    case 0: return xml_parse(copy, (xml_options_t)mode);
+    case 1: return xml_parse_span(copy, size, (xml_options_t)mode, error);
+    case 2: return xml_parse_span_limited(copy, size, (xml_options_t)mode, NULL, error);
+    default: return xml_parse_span_limited(copy, size, (xml_options_t)mode, &limits, error);
+  }
+}
+
+static int
+check_caps(const char *source) {
+  xml_parse_limits_t limits = {SIZE_MAX, SIZE_MAX, SIZE_MAX, SIZE_MAX};
+  xml_parse_error_t  error;
+  xml_doc_t         *doc;
+  char             *copy;
+  size_t            size, cap;
+  unsigned          mode, kind;
+
+  size = strlen(source);
+  if (!(copy = malloc(size)))
+    return 1;
+
+  for (mode = 0; mode < 16; mode++) {
+    for (kind = 0; kind < 4; kind++) {
+      for (cap = 0; cap < 4; cap++) {
+        limits.max_input_bytes  = SIZE_MAX;
+        limits.max_memory_bytes = SIZE_MAX;
+        limits.max_tokens       = SIZE_MAX;
+        limits.max_depth        = SIZE_MAX;
+        switch (kind) {
+          case 0: limits.max_input_bytes = cap; break;
+          case 1: limits.max_memory_bytes = sizeof(xml_doc_t) + cap * 65536; break;
+          case 2: limits.max_tokens = cap; break;
+          default: limits.max_depth = cap; break;
+        }
+        calls = failAt = bytes = 0;
+        memcpy(copy, source, size);
+        doc = xml_parse_span_limited(copy, size, (xml_options_t)mode, &limits, &error);
+        if (bytes > limits.max_memory_bytes || error.offset > size
+            || (!doc && error.status != XML_PARSE_LIMIT)
+            || (doc && error.status != XML_PARSE_OK)
+            || (kind == 0 && calls)) {
+          xml_free(doc);
+          free(copy);
+          return 2;
+        }
+        xml_free(doc);
+        if (live) {
+          free(copy);
+          return 3;
+        }
+      }
+    }
+  }
+  free(copy);
+  return 0;
+}
+
 static int
 check_failures(const char *source) {
   xml_parse_error_t error;
@@ -51,12 +114,11 @@ check_failures(const char *source) {
   if (!(copy = malloc(size + 1)))
     return 1;
 
-  for (span = 0; span < 2; span++) {
+  for (span = 0; span < 4; span++) {
     for (mode = 0; mode < 16; mode++) {
       memcpy(copy, source, size + 1);
       calls = failAt = 0;
-      doc = span ? xml_parse_span(copy, size, (xml_options_t)mode, &error)
-                 : xml_parse(copy, (xml_options_t)mode);
+      doc = parse(span, copy, size, mode, &error);
       if (!doc || (span && error.status != XML_PARSE_OK)) {
         free(copy);
         return 2;
@@ -72,8 +134,7 @@ check_failures(const char *source) {
         failAt = i;
         calls = 0;
         memset(&error, 0xff, sizeof(error));
-        doc = span ? xml_parse_span(copy, size, (xml_options_t)mode, &error)
-                   : xml_parse(copy, (xml_options_t)mode);
+        doc = parse(span, copy, size, mode, &error);
         if (doc || live
             || (span && (error.status != XML_PARSE_OUT_OF_MEMORY || error.offset > size))) {
           free(copy);
@@ -83,8 +144,8 @@ check_failures(const char *source) {
     }
   }
   free(copy);
-  printf("all %zu allocation failures, 16 modes, both APIs release prior pages: pass\n", allocationCount);
-  return 0;
+  printf("all %zu allocation failures, 16 modes, legacy/span/limited APIs release prior pages: pass\n", allocationCount);
+  return check_caps(source);
 }
 
 int
