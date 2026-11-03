@@ -49,6 +49,15 @@ xmlc_parse_span(const char        * __restrict contents,
                 xml_options_t                 options,
                 xml_parse_error_t            *error);
 
+/* same resource caps and failure contract as xml_parse_span_limited(). */
+XML_EXPORT
+xml_doc_t*
+xmlc_parse_span_limited(const char               * __restrict contents,
+                        size_t                               size,
+                        xml_options_t                        options,
+                        const xml_parse_limits_t            *limits,
+                        xml_parse_error_t                   *error);
+
 /*!
  * @brief frees xml document and its allocated memory
  */

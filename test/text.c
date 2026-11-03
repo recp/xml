@@ -25,14 +25,17 @@ typedef struct Fixture {
 
 static xml_doc_t*
 parse(unsigned api, char *source, size_t size, unsigned mode, xml_parse_error_t *error) {
-  xml_options_t options;
+  const xml_parse_limits_t limits = {SIZE_MAX, SIZE_MAX, SIZE_MAX, SIZE_MAX};
+  xml_options_t           options;
 
   options = (xml_options_t)(mode | XML_PRESERVE_TEXT);
   switch (api) {
     case 0: return xml_parse(source, options);
     case 1: return xmlc_parse(source, options);
     case 2: return xml_parse_span(source, size, options, error);
-    default: return xmlc_parse_span(source, size, options, error);
+    case 3: return xmlc_parse_span(source, size, options, error);
+    case 4: return xml_parse_span_limited(source, size, options, &limits, error);
+    default: return xmlc_parse_span_limited(source, size, options, &limits, error);
   }
 }
 
@@ -60,7 +63,7 @@ fixtures(void) {
   size_t            i, j, size, length, sum;
   unsigned          api, mode;
 
-  for (api = 0; api < 4; api++) {
+  for (api = 0; api < 6; api++) {
     for (mode = 0; mode < 8; mode++) {
       for (i = 0; i < XML_ARR_LEN(fixtures); i++) {
         size = strlen(fixtures[i].source);
@@ -121,7 +124,7 @@ boundaries(void) {
   size_t            i, size, length;
   unsigned          api, mode;
 
-  for (api = 0; api < 4; api++) {
+  for (api = 0; api < 6; api++) {
     for (mode = 0; mode < 8; mode++) {
       for (i = 0; i < XML_ARR_LEN(valid); i++) {
         size = strlen(valid[i]);
@@ -167,7 +170,7 @@ long_cdata(void) {
   size_t            i, length, size;
   unsigned          api, mode;
 
-  for (api = 0; api < 4; api++) {
+  for (api = 0; api < 6; api++) {
     for (mode = 0; mode < 8; mode++) {
       for (i = 0; i < XML_ARR_LEN(lengths); i++) {
         length = lengths[i];
@@ -204,7 +207,7 @@ nesting(void) {
   unsigned          api, mode;
 
   size = strlen(input);
-  for (api = 0; api < 4; api++) {
+  for (api = 0; api < 6; api++) {
     for (mode = 0; mode < 8; mode++) {
       CHECK((source = malloc(size + 1)));
       memcpy(source, input, size + 1);
@@ -246,7 +249,7 @@ printing(void) {
   unsigned          api, mode;
 
   size = strlen(input);
-  for (api = 0; api < 4; api++) {
+  for (api = 0; api < 6; api++) {
     for (mode = 0; mode < 8; mode += 2) {
       CHECK((source = malloc(size + 1)));
       memcpy(source, input, size + 1);

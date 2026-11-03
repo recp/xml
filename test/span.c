@@ -11,8 +11,14 @@
 #define CHECK(c) do { if (!(c)) { fprintf(stderr, "line %d: %s\n", __LINE__, #c); return 1; } } while (0)
 
 static xml_doc_t*
-parse(bool compiled, const char *text, size_t size,
+parse(unsigned compiled, const char *text, size_t size,
       xml_options_t options, xml_parse_error_t *error) {
+  const xml_parse_limits_t limits = {SIZE_MAX, SIZE_MAX, SIZE_MAX, SIZE_MAX};
+
+  if (compiled >= 2)
+    return compiled == 2 ? xml_parse_span_limited(text, size, options, &limits, error)
+                         : xmlc_parse_span_limited(text, size, options, &limits, error);
+
   return compiled ? xmlc_parse_span(text, size, options, error)
                   : xml_parse_span(text, size, options, error);
 }
@@ -67,7 +73,7 @@ boundaries(void) {
   size_t            i, size, length;
   unsigned          compiled, mode;
 
-  for (compiled = 0; compiled < 2; compiled++) {
+  for (compiled = 0; compiled < 4; compiled++) {
     for (mode = 0; mode < 8; mode++) {
       for (i = 0; i < XML_ARR_LEN(sources); i++) {
         size = strlen(sources[i]);
@@ -108,7 +114,7 @@ errors(void) {
   size_t            i, size;
   unsigned          compiled, mode, kind;
 
-  for (compiled = 0; compiled < 2; compiled++) {
+  for (compiled = 0; compiled < 4; compiled++) {
     CHECK(!parse(compiled, NULL, 0, XML_READONLY, &error));
     CHECK(error.status == XML_PARSE_INVALID_ARGUMENT && error.offset == 0);
     CHECK(!parse(compiled, "<r/>", SIZE_MAX, XML_READONLY, &error));
@@ -177,7 +183,7 @@ mutations(void) {
     CHECK((span = malloc(size)) && (terminated = malloc(size + 1)));
     for (position = 0; position < size; position++) {
       for (change = 0; change < sizeof(changes) - 1; change++) {
-        for (compiled = 0; compiled < 2; compiled++) {
+        for (compiled = 0; compiled < 4; compiled++) {
           for (mode = 0; mode < 8; mode++) {
             memcpy(span, sources[i], size);
             span[position] = changes[change];

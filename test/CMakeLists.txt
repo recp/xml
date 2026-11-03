@@ -13,3 +13,7 @@ add_test(NAME bounded-input COMMAND xml-span-test)
 add_executable(xml-text-test text.c)
 target_link_libraries(xml-text-test PRIVATE xml)
 add_test(NAME text-preservation COMMAND xml-text-test)
+
+add_executable(xml-limits-test limits.c)
+target_link_libraries(xml-limits-test PRIVATE xml)
+add_test(NAME resource-limits COMMAND xml-limits-test)

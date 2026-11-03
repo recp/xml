@@ -40,10 +40,10 @@ xml__parse_find(const char *p, int c, const char *limit) {
 XML_INLINE
 xml_t*
 xml__parse_text(xml_doc_t *doc, xml_t *parent, const char *text,
-                bool readonly, bool reverse) {
+                bool readonly, bool reverse, xml_parse_budget_t *budget) {
   xml_t *value;
 
-  if (!(value = xml__impl_calloc(doc, sizeof(*value))))
+  if (!(value = xml__impl_calloc_budget(doc, sizeof(*value), budget)))
     return NULL;
 
   value->type     = XML_STRING;
@@ -70,7 +70,8 @@ xml_doc_t*
 xml__parse(const char        * __restrict contents,
            xml_options_t                 options,
            const char                   *limit,
-           xml_parse_error_t            *error) {
+           xml_parse_error_t            *error,
+           xml_parse_budget_t           *budget) {
   xml_t        tmproot;
   xml_doc_t   *doc;
   xml_t       *obj, *parent, *val;
@@ -87,6 +88,15 @@ xml__parse(const char        * __restrict contents,
   if (!contents || (c = *contents) == '\0')
     return NULL;
   
+  if (budget) {
+    if (budget->bytes < sizeof(*doc) + sizeof(xml_mem_t) + XML_MEM_PAGE) {
+      if (error)
+        error->status = XML_PARSE_LIMIT;
+      return NULL;
+    }
+    budget->bytes -= sizeof(*doc) + sizeof(xml_mem_t) + XML_MEM_PAGE;
+  }
+
   if (!(doc = calloc(1, sizeof(*doc)))) {
     if (error)
       error->status = XML_PARSE_OUT_OF_MEMORY;
@@ -224,7 +234,7 @@ xml__parse(const char        * __restrict contents,
             if ((size_t)(end - s) > UINT32_MAX)
               goto range;
 
-            val = xml__parse_text(doc, obj, s, readonly, reverse);
+            val = xml__parse_text(doc, obj, s, readonly, reverse, budget);
             if (!val)
               goto oom;
 
@@ -370,6 +380,9 @@ xml__parse(const char        * __restrict contents,
             obj->next = NULL;
           }
           
+          if (budget)
+            budget->depth++;
+
           obj    = parent;
           parent = parent->parent;
           pos    = endel;
@@ -395,9 +408,15 @@ xml__parse(const char        * __restrict contents,
             if (complete)
               goto err;
 
+            if (budget) {
+              if (!budget->depth)
+                goto exhausted;
+              budget->depth--;
+            }
+
             /* switch parent */
             parent        = obj;
-            obj           = xml__impl_calloc(doc, sizeof(xml_t));
+            obj           = xml__impl_calloc_budget(doc, sizeof(xml_t), budget);
             if (!obj)
               goto oom;
 
@@ -471,7 +490,7 @@ xml__parse(const char        * __restrict contents,
             p--;
             break;
           case beginattr:
-            attr = xml__impl_calloc(doc, sizeof(xml_attr_t));
+            attr = xml__impl_calloc_budget(doc, sizeof(xml_attr_t), budget);
             if (!attr)
               goto oom;
             
@@ -582,7 +601,7 @@ xml__parse(const char        * __restrict contents,
             if (obj == &tmproot)
               goto err;
 
-            val = xml__parse_text(doc, obj, s, readonly, reverse);
+            val = xml__parse_text(doc, obj, s, readonly, reverse, budget);
             if (!val)
               goto oom;
 
@@ -620,8 +639,11 @@ done:
   }
   return doc;
 
+exhausted:
+  status = XML_PARSE_LIMIT;
+  goto err;
 oom:
-  status = XML_PARSE_OUT_OF_MEMORY;
+  status = budget && budget->exhausted ? XML_PARSE_LIMIT : XML_PARSE_OUT_OF_MEMORY;
   goto err;
 range:
   status = XML_PARSE_RANGE;
@@ -639,8 +661,10 @@ xml_doc_t*
 xml__parse_span(const char        * __restrict contents,
                 size_t                        size,
                 xml_options_t                 options,
-                xml_parse_error_t            *error) {
-  const char *nul;
+                xml_parse_error_t            *error,
+                const xml_parse_limits_t     *limits) {
+  xml_parse_budget_t budget;
+  const char        *nul;
 
   if (error) {
     error->status = XML_PARSE_INVALID_ARGUMENT;
@@ -649,6 +673,12 @@ xml__parse_span(const char        * __restrict contents,
   if (!contents || size > PTRDIFF_MAX
       || (options & ~(XML_REVERSE | XML_PREFIXES | XML_READONLY | XML_PRESERVE_TEXT)))
     return NULL;
+
+  if (limits && size > limits->max_input_bytes) {
+    if (error)
+      error->status = XML_PARSE_LIMIT;
+    return NULL;
+  }
 
   if (error)
     error->status = XML_PARSE_INVALID_DATA;
@@ -662,7 +692,13 @@ xml__parse_span(const char        * __restrict contents,
       error->offset = (size_t)(nul - contents);
     return NULL;
   }
-  return xml__parse(contents, options, contents + size, error);
+  if (limits) {
+    budget.bytes     = limits->max_memory_bytes;
+    budget.tokens    = limits->max_tokens;
+    budget.depth     = limits->max_depth;
+    budget.exhausted = false;
+  }
+  return xml__parse(contents, options, contents + size, error, limits ? &budget : NULL);
 }
 
 /* isolate optional text semantics from the default parser hot loops. */
@@ -676,9 +712,9 @@ xml__parse_preserved(const char *contents, xml_options_t options,
                      size_t size, xml_parse_error_t *error, bool bounded) {
   options = (xml_options_t)(options | XML_PRESERVE_TEXT);
   if (bounded)
-    return xml__parse_span(contents, size, options, error);
+    return xml__parse_span(contents, size, options, error, NULL);
 
-  return xml__parse(contents, options, NULL, NULL);
+  return xml__parse(contents, options, NULL, NULL, NULL);
 }
 
 XML_INLINE
@@ -687,7 +723,7 @@ xml_parse(const char * __restrict contents, xml_options_t options) {
   if (options & XML_PRESERVE_TEXT)
     return xml__parse_preserved(contents, options, 0, NULL, false);
 
-  return xml__parse(contents, (xml_options_t)(options & ~XML_PRESERVE_TEXT), NULL, NULL);
+  return xml__parse(contents, (xml_options_t)(options & ~XML_PRESERVE_TEXT), NULL, NULL, NULL);
 }
 
 XML_INLINE
@@ -699,7 +735,36 @@ xml_parse_span(const char        * __restrict contents,
   if (options & XML_PRESERVE_TEXT)
     return xml__parse_preserved(contents, options, size, error, true);
 
-  return xml__parse_span(contents, size, (xml_options_t)(options & ~XML_PRESERVE_TEXT), error);
+  return xml__parse_span(contents, size, (xml_options_t)(options & ~XML_PRESERVE_TEXT), error, NULL);
+}
+
+/* keep the optional text state out of the ordinary limited parser loop. */
+#if defined(_MSC_VER)
+static __declspec(noinline)
+#else
+static __attribute__((noinline, unused))
+#endif
+xml_doc_t*
+xml__parse_limited_text(const char *contents, size_t size,
+                        xml_options_t options, const xml_parse_limits_t *limits,
+                        xml_parse_error_t *error) {
+  return xml__parse_span(contents, size, (xml_options_t)(options | XML_PRESERVE_TEXT), error, limits);
+}
+
+XML_INLINE
+xml_doc_t*
+xml_parse_span_limited(const char               * __restrict contents,
+                       size_t                               size,
+                       xml_options_t                        options,
+                       const xml_parse_limits_t            *limits,
+                       xml_parse_error_t                   *error) {
+  if (!limits)
+    return xml_parse_span(contents, size, options, error);
+
+  if (options & XML_PRESERVE_TEXT)
+    return xml__parse_limited_text(contents, size, options, limits, error);
+
+  return xml__parse_span(contents, size, (xml_options_t)(options & ~XML_PRESERVE_TEXT), error, limits);
 }
 
 #endif /* xml_impl_parse_h */

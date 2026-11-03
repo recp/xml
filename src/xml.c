@@ -45,6 +45,7 @@ xmlc__parse_default(const char * __restrict contents, xml_options_t options) {
     return xml__parse(contents,
                       (xml_options_t)((options | XML_READONLY) & ~XML_PRESERVE_TEXT),
                       NULL,
+                      NULL,
                       NULL);
 
   reverse          = options & XML_REVERSE;
@@ -77,9 +78,14 @@ xmlc__parse_span_default(const char        * __restrict contents,
     return xml__parse_span(contents,
                            size,
                            (xml_options_t)((options | XML_READONLY) & ~XML_PRESERVE_TEXT),
-                           error);
+                           error,
+                           NULL);
 
-  return xml__parse_span(contents, size, (xml_options_t)(options & ~(XML_READONLY | XML_PRESERVE_TEXT)), error);
+  return xml__parse_span(contents,
+                         size,
+                         (xml_options_t)(options & ~(XML_READONLY | XML_PRESERVE_TEXT)),
+                         error,
+                         NULL);
 }
 
 XML_EXPORT
@@ -107,4 +113,17 @@ XML_EXPORT
 void
 xmlc_free(xml_doc_t * __restrict jsondoc) {
   xml_free(jsondoc);
+}
+
+XML_EXPORT
+xml_doc_t*
+xmlc_parse_span_limited(const char               * __restrict contents,
+                        size_t                               size,
+                        xml_options_t                        options,
+                        const xml_parse_limits_t            *limits,
+                        xml_parse_error_t                   *error) {
+  if (!limits)
+    return xmlc_parse_span(contents, size, options, error);
+
+  return xml_parse_span_limited(contents, size, options, limits, error);
 }

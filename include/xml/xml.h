@@ -62,8 +62,17 @@ typedef enum xml_parse_status_t {
   XML_PARSE_INVALID_ARGUMENT,
   XML_PARSE_INVALID_DATA,
   XML_PARSE_OUT_OF_MEMORY,
-  XML_PARSE_RANGE
+  XML_PARSE_RANGE,
+  XML_PARSE_LIMIT
 } xml_parse_status_t;
+
+/* zero is a real cap; SIZE_MAX leaves an individual resource unrestricted. */
+typedef struct xml_parse_limits_t {
+  size_t max_input_bytes;
+  size_t max_memory_bytes;
+  size_t max_tokens;
+  size_t max_depth;
+} xml_parse_limits_t;
 
 typedef struct xml_parse_error_t {
   xml_parse_status_t status;
@@ -119,6 +128,33 @@ xml_parse_span(const char        * __restrict contents,
                size_t                        size,
                xml_options_t                 options,
                xml_parse_error_t            *error);
+
+/*!
+ * @brief parse a borrowed span with explicit resource caps
+ *
+ * Same options, ownership and grammar as xml_parse_span(). A NULL limits pointer
+ * uses its unrestricted path. Otherwise all four inclusive caps apply; zero
+ * permits none and SIZE_MAX leaves that resource unrestricted. Input size is
+ * checked before scanning any bytes. Memory counts the document and complete
+ * arena allocations, including page headers and unused page capacity, but not
+ * borrowed input, allocator metadata or fixed parser stack. Pages retain their
+ * normal size; a smaller cap fails rather than changing the allocation policy.
+ * Tokens count elements, attributes and retained text/CDATA nodes. Element depth
+ * starts at one for the root; siblings reuse the same depth allowance.
+ *
+ * A limit failure reports XML_PARSE_LIMIT, releases all owned memory and returns
+ * NULL. Argument/initial input or memory cap failures use offset zero; later
+ * failures report the current byte cursor. Input may be modified on failure
+ * without XML_READONLY. Limits can precede syntax diagnostics. These resource
+ * caps do not impose a wall-clock deadline or validate additional XML grammar.
+ */
+XML_INLINE
+xml_doc_t*
+xml_parse_span_limited(const char               * __restrict contents,
+                       size_t                               size,
+                       xml_options_t                        options,
+                       const xml_parse_limits_t            *limits,
+                       xml_parse_error_t                   *error);
 
 /*!
  * @brief frees xml document and its allocated memory
