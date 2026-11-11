@@ -76,6 +76,12 @@ fixtures(void) {
     {"<?xml version='1.0' extra='x'?><r/>", false},
     {"<?xml version='1.0'/><r/>", false},
     {"<?p?data?><r/>", false},
+    {"<r <x/></r>", false},
+    {"<r <x/> </r>", false},
+    {"<r a='v' <x/></r>", false},
+    {"<r></r />", false},
+    {"<r></r <!--c-->>", false},
+    {"<r><x></x \t\r\n>y</r >", true},
     {"<r a='x' b=\"y\"> text &#9; <![CDATA[<&unknown;]]><!--x]]>y--><?p x]]>y?></r>", true},
     {"<r><ns:item ns:a='&amp; &lt; &gt; &quot; &apos; &#9; &#10; &#13;'/></r>", true},
     {"\xef\xbb\xbf<r>\r\n<e/> </r>", true},
@@ -283,8 +289,9 @@ offsets(void) {
     " <?xml version='1.0'?><r/>", "<r><?xml version='1.0'?></r>",
     "\xef\xbb\xbf <?xml version='1.0'?><r/>",
     "<?xml version='2.0'?><r/>", "<?xml version='1.x'?><r/>",
+    "<r <x/></r>", "<r a='v' <x/></r>", "<r></r />",
   };
-  const size_t offsets[] = {1, 6, 5, 8, 1, 2, 5, 9, 2, 5, 3, 5, 6, 15, 17};
+  const size_t offsets[] = {1, 6, 5, 8, 1, 2, 5, 9, 2, 5, 3, 5, 6, 15, 17, 3, 9, 7};
   xml_parse_error_t error;
   xml_doc_t        *doc;
   size_t            i;

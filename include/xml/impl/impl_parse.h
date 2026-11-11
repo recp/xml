@@ -180,6 +180,10 @@ xml__parse(const char        * __restrict contents,
       case '<': { /* TODO: what if we get << or <<!--  ->TAG>... here? */
         if (pos == begintag)
           goto err;
+#if defined(XML__PARSE_CHECKED)
+        if (pos == beginattr || pos == endtag)
+          goto err;
+#endif
 
         pos = begintag;
         
@@ -411,6 +415,12 @@ xml__parse(const char        * __restrict contents,
               if (remaining)
                 goto err;
             }
+#if defined(XML__PARSE_CHECKED)
+            while (xml__ascii_space(c))
+              c = xml__parse_char(++p, limit, 0);
+            if (c != '>')
+              goto err;
+#endif
             
             s = p + 1;
             p--;

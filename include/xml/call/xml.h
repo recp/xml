@@ -64,6 +64,8 @@ xmlc_parse_span_limited(const char               * __restrict contents,
  * otherwise), PI target names, UTF-8/XML characters and value references.
  * attribute values require single or double quotes and separators.
  * leading tag whitespace and spaced self-closing delimiters are rejected.
+ * markup cannot interrupt an unfinished start tag, and closing tag names
+ * permit only optional XML whitespace before their final delimiter.
  * a leading UTF-8 BOM is accepted and offsets include it.
  * an XML declaration must appear first (after an optional BOM), with ordered
  * version, optional encoding and optional standalone fields. version 1.x is
