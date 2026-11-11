@@ -34,7 +34,7 @@ xml__parse_char(const char *p, const char *limit, size_t offset) {
 XML_INLINE
 char*
 xml__parse_find(const char *p, int c, const char *limit) {
-  return limit ? (char *)memchr(p, c, (size_t)(limit - p)) : strchr(p, c);
+  return limit ? (char *)memchr(p, c, (size_t)(limit - p)) : (char *)strchr(p, c);
 }
 
 XML_INLINE
@@ -43,7 +43,7 @@ xml__parse_text(xml_doc_t *doc, xml_t *parent, const char *text,
                 bool readonly, bool reverse, xml_parse_budget_t *budget) {
   xml_t *value;
 
-  if (!(value = xml__impl_calloc_budget(doc, sizeof(*value), budget)))
+  if (!(value = (xml_t *)xml__impl_calloc_budget(doc, sizeof(*value), budget)))
     return NULL;
 
   value->type     = XML_STRING;
@@ -57,7 +57,7 @@ xml__parse_text(xml_doc_t *doc, xml_t *parent, const char *text,
     else
       xml_xml(parent)->next = value;
   } else {
-    value->next = parent->val;
+    value->next = (xml_t *)parent->val;
   }
   parent->val   = value;
   value->parent = parent;
@@ -103,7 +103,7 @@ xml__parse(const char        * __restrict contents,
     budget->bytes -= sizeof(*doc) + sizeof(xml_mem_t) + XML_MEM_PAGE;
   }
 
-  if (!(doc = calloc(1, sizeof(*doc)))) {
+  if (!(doc = (xml_doc_t *)calloc(1, sizeof(*doc)))) {
     if (error)
       error->status = XML_PARSE_OUT_OF_MEMORY;
     return NULL;
@@ -343,7 +343,7 @@ xml__parse(const char        * __restrict contents,
             c = xml__parse_char(++p, limit, 0);
           }
 
-          pos = 0;
+          pos = unknown;
         } else if (preserve) {
           goto err;
         }
@@ -496,7 +496,7 @@ xml__parse(const char        * __restrict contents,
 
             /* switch parent */
             parent        = obj;
-            obj           = xml__impl_calloc_budget(doc, sizeof(xml_t), budget);
+            obj           = (xml_t *)xml__impl_calloc_budget(doc, sizeof(xml_t), budget);
             if (!obj)
               goto oom;
 
@@ -513,7 +513,7 @@ xml__parse(const char        * __restrict contents,
               else
                 xml_xml(parent)->next = obj;
             } else {
-              obj->next = parent->val;
+              obj->next = (xml_t *)parent->val;
             }
             
             parent->val = obj;
@@ -587,7 +587,7 @@ xml__parse(const char        * __restrict contents,
             if (c == '"' || c == '\'' || c == '`')
               goto err;
 #endif
-            attr = xml__impl_calloc_budget(doc, sizeof(xml_attr_t), budget);
+            attr = (xml_attr_t *)xml__impl_calloc_budget(doc, sizeof(xml_attr_t), budget);
             if (!attr)
               goto oom;
             
@@ -754,7 +754,7 @@ done:
     ((xml_t *)tmproot.val)->next   = NULL;
   }
   
-  doc->root = tmproot.val;
+  doc->root = (xml_t *)tmproot.val;
   if (error) {
     error->status = XML_PARSE_OK;
     error->offset = (size_t)(limit - contents);

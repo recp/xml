@@ -72,7 +72,7 @@ xml_print_ex(FILE  * __restrict ostream,
             pad++;
 
           /* parent = xml; */
-          xml = xml->val;
+          xml = (xml_t *)xml->val;
           
           if (opt > 0 && xml->type == XML_ELEMENT)
             fprintf(ostream, "\n");

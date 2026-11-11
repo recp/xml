@@ -29,7 +29,7 @@ XML_INLINE
 xml_type_t
 xml_valtype(const xml_t * __restrict object) {
   if (object->val == NULL)
-    return 0;
+    return XML_UNKOWN;
   
   return ((xml_t *)object->val)->type;
 }
@@ -92,7 +92,7 @@ xmls_next(const xml_t * __restrict obj) {
 XML_INLINE
 const xml_t*
 xmls(const xml_t * __restrict obj) {
-  if (!obj || obj->type != XML_ELEMENT || !(obj = obj->val))
+  if (!obj || obj->type != XML_ELEMENT || !(obj = (const xml_t *)obj->val))
     return NULL;
 
   if (obj->type == XML_STRING)
@@ -417,7 +417,7 @@ xml_val_eq(const xml_t * __restrict obj, const char * __restrict str) {
   if ((strsize = strlen(str)) != (size_t)obj->valsize)
     return false;
 
-  return xml__bytes_eq(str, obj->val, strsize);
+  return xml__bytes_eq(str, (const char *)obj->val, strsize);
 }
 
 /*!
@@ -443,7 +443,7 @@ xml_val_eqsz(const xml_t * __restrict obj,
   if (strsize != (size_t)obj->valsize)
     return false;
 
-  return xml__bytes_eq(str, obj->val, strsize);
+  return xml__bytes_eq(str, (const char *)obj->val, strsize);
 }
 
 XML_INLINE
@@ -454,7 +454,7 @@ xml_val_eq_packed4(const xml_t * __restrict obj,
   if (!obj || !obj->val)
     return false;
 
-  return xml__bytes_eq_packed4(obj->val,
+  return xml__bytes_eq_packed4((const char *)obj->val,
                                (size_t)obj->valsize,
                                packed,
                                strsize);
@@ -468,7 +468,7 @@ xml_val_eq_packed8(const xml_t * __restrict obj,
   if (!obj || !obj->val)
     return false;
 
-  return xml__bytes_eq_packed8(obj->val,
+  return xml__bytes_eq_packed8((const char *)obj->val,
                                (size_t)obj->valsize,
                                packed,
                                strsize);
@@ -482,7 +482,7 @@ xml_val_eq_packed(const xml_t * __restrict obj,
   if (!obj || !obj->val)
     return false;
 
-  return xml__bytes_eq_packed(obj->val,
+  return xml__bytes_eq_packed((const char *)obj->val,
                               (size_t)obj->valsize,
                               packed,
                               strsize);

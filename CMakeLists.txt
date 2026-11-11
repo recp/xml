@@ -22,7 +22,7 @@ endif()
 
 if(MSVC)
 	add_definitions(-D_WINDOWS -D_USRDLL -DXML_EXPORTS -DXML_DLL)
-	add_compile_options(/W3 /Ox /Gy /Oi /TC)
+	add_compile_options(/W3 /Ox /Gy /Oi $<$<COMPILE_LANGUAGE:C>:/TC>)
 else()
   add_compile_options(-Wall -Werror -O3 -fstrict-aliasing)
 endif()

@@ -26,22 +26,12 @@
 
 #define XML_OBJMAP_FN(KEY, FUN, PARAM)                                        \
   {                                                                           \
-    .object       = NULL,                                                     \
-    .key          = KEY,                                                      \
-    .keysize      = 0,                                                        \
-    .foundFunc    = {FUN, PARAM},                                             \
-    .notFoundFunc = {NULL, NULL},                                             \
-    .userdata     = NULL                                                      \
+    NULL, KEY, 0, NULL, {FUN, PARAM}, {NULL, NULL}                              \
   }
 
 #define XML_OBJMAP_OBJ(KEY, USERDATA)                                         \
   {                                                                           \
-    .object       = NULL,                                                     \
-    .key          = KEY,                                                      \
-    .keysize      = 0,                                                        \
-    .foundFunc    = {NULL, NULL},                                             \
-    .notFoundFunc = {NULL, NULL},                                             \
-    .userdata     = USERDATA                                                  \
+    NULL, KEY, 0, USERDATA, {NULL, NULL}, {NULL, NULL}                          \
   }
 
 typedef void (*xml_objmap_fun_t)(xml_t * __restrict object,

@@ -22,7 +22,7 @@ xml_objmap(xml_t        * __restrict obj,
   uint16_t      tagsize;
   char          first;
 
-  if (!obj || obj->type != XML_ELEMENT || !(obj = obj->val))
+  if (!obj || obj->type != XML_ELEMENT || !(obj = (xml_t *)obj->val))
     return;
 
   start = 0;

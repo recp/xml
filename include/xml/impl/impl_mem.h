@@ -16,7 +16,6 @@ typedef struct xml_mem_t {
   struct xml_mem_t *next;
   size_t            size;
   size_t            capacity;
-  char              data[];
 } xml_mem_t;
 
 /* parser-local remaining resources; never retained by the document. */
@@ -36,20 +35,21 @@ xml__impl_calloc(xml_doc_t * __restrict doc, size_t size) {
   xml_mem_t *mem;
   size_t     sizeToAlloc;
   
-  mem         = doc->memroot;
+  mem         = (xml_mem_t *)doc->memroot;
   sizeToAlloc = (XML_MEM_PAGE < size) ? size : XML_MEM_PAGE;
   
   if (size > mem->capacity - mem->size) {
     if (sizeToAlloc > SIZE_MAX - sizeof(*mem)
-        || !(mem = calloc(1, sizeof(*mem) + sizeToAlloc)))
+        || !(mem = (xml_mem_t *)calloc(1, sizeof(*mem) + sizeToAlloc)))
       return NULL;
 
     mem->capacity = sizeToAlloc;
-    mem->next     = doc->memroot;
+    mem->next     = (xml_mem_t *)doc->memroot;
     doc->memroot  = mem;
   }
   
-  data       = (char *)mem->data + mem->size;
+  /* payload follows the fixed header in the same allocation. */
+  data       = (char *)mem + sizeof(*mem) + mem->size;
   mem->size += size;
 
   return data;
@@ -70,7 +70,7 @@ xml__impl_calloc_budget(xml_doc_t * __restrict doc, size_t size,
     return NULL;
   }
 
-  mem = doc->memroot;
+  mem = (xml_mem_t *)doc->memroot;
   if (size > mem->capacity - mem->size) {
     bytes = size > XML_MEM_PAGE ? size : XML_MEM_PAGE;
     if (bytes > SIZE_MAX - sizeof(*mem))

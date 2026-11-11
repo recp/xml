@@ -19,7 +19,7 @@ xml_free(xml_doc_t * __restrict doc) {
   if (!doc)
     return;
 
-  mem = doc->memroot;
+  mem = (xml_mem_t *)doc->memroot;
   while (mem) {
     tofree = mem;
     mem    = mem->next;
@@ -137,7 +137,7 @@ xml_elem_sz(const xml_t * __restrict object,
             size_t                   namesize) {
   xml_t *iter;
   
-  if (!object || !name || object->type != XML_ELEMENT || !(iter = object->val))
+  if (!object || !name || object->type != XML_ELEMENT || !(iter = (xml_t *)object->val))
     return NULL;
   
   while (iter
@@ -158,7 +158,7 @@ xml_elem_packed4(const xml_t * __restrict object,
                  size_t                   namesize) {
   xml_t *iter;
 
-  if (!object || object->type != XML_ELEMENT || !(iter = object->val))
+  if (!object || object->type != XML_ELEMENT || !(iter = (xml_t *)object->val))
     return NULL;
 
   while (iter
@@ -180,7 +180,7 @@ xml_elem_packed8(const xml_t * __restrict object,
                  size_t                   namesize) {
   xml_t *iter;
 
-  if (!object || object->type != XML_ELEMENT || !(iter = object->val))
+  if (!object || object->type != XML_ELEMENT || !(iter = (xml_t *)object->val))
     return NULL;
 
   while (iter
@@ -202,7 +202,7 @@ xml_elem_packed(const xml_t * __restrict object,
                 size_t                   namesize) {
   xml_t *iter;
 
-  if (!object || object->type != XML_ELEMENT || !(iter = object->val))
+  if (!object || object->type != XML_ELEMENT || !(iter = (xml_t *)object->val))
     return NULL;
 
   while (iter

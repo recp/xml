@@ -64,6 +64,23 @@ add_executable(xml-name-test name.c)
 target_link_libraries(xml-name-test PRIVATE xml)
 add_test(NAME name-validation COMMAND xml-name-test)
 
+include(CheckLanguage)
+check_language(CXX)
+if(CMAKE_CXX_COMPILER)
+  enable_language(CXX)
+  add_executable(xml-cxx-test cxx.cpp cxx_abi.c)
+  target_link_libraries(xml-cxx-test PRIVATE xml)
+  set_target_properties(xml-cxx-test PROPERTIES
+    CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES CXX_EXTENSIONS NO
+  )
+  if(NOT MSVC)
+    target_compile_options(xml-cxx-test PRIVATE -Wextra -Wpedantic)
+  endif()
+  add_test(NAME cxx-consumer COMMAND xml-cxx-test)
+else()
+  message(STATUS "C++ consumer qualification unavailable: no C++ compiler")
+endif()
+
 find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
   add_test(NAME markup-reference
