@@ -438,6 +438,8 @@ xml__parse(const char        * __restrict contents,
         break;
       case '>':
 #if defined(XML__PARSE_CHECKED)
+        if (pos == begintag)
+          goto err;
         if (pos == beginattr) {
           attributeStatus = (xml_parse_status_t)xml__parse_check_attributes(obj, budget, &checkedStart);
           if (attributeStatus != XML_PARSE_OK) {

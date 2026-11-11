@@ -10,6 +10,10 @@ add_executable(xml-checked-test checked.c)
 target_link_libraries(xml-checked-test PRIVATE xml)
 add_test(NAME checked-input COMMAND xml-checked-test)
 
+add_executable(xml-document-test document.c)
+target_link_libraries(xml-document-test PRIVATE xml)
+add_test(NAME document-grammar COMMAND xml-document-test)
+
 add_executable(xml-processing-test processing.c)
 target_link_libraries(xml-processing-test PRIVATE xml)
 add_test(NAME processing-targets COMMAND xml-processing-test)
@@ -58,6 +62,9 @@ add_test(NAME name-validation COMMAND xml-name-test)
 
 find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
+  add_test(NAME document-reference
+           COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/document_reference.py"
+                   $<TARGET_FILE:xml-document-test>)
   add_test(NAME decode-reference
            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/decode_reference.py"
                    $<TARGET_FILE:xml-decode-test>)
