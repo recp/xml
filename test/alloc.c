@@ -270,7 +270,7 @@ main(void) {
   memcpy(source + offset, "</r>", 5);
   if (check_failures(source))
     return 4;
-  if (check_failures("<?xml version='1.0' encoding='UTF-8' standalone='yes'?><r/>"))
+  if (check_failures("<?xml version='1.0' encoding='UTF-8' standalone='yes'?><?pi a:b?><r><?pi?></r>"))
     return 5;
 #endif
 

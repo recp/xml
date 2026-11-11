@@ -18,7 +18,7 @@ static bool
 xml__parse_check_chars(const char *text, size_t size, size_t *offset);
 
 static bool
-xml__parse_check_pi(const char *text, size_t size, bool initial, size_t *offset);
+xml__parse_check_pi(const char *text, size_t size, bool initial, bool prefixes, size_t *offset);
 
 struct xml_t;
 struct xml_parse_budget_t;
@@ -32,6 +32,7 @@ xml__parse_check_attributes(const struct xml_t *element,
 #define XML__PARSE_CHECKED
 #include "../include/xml/name.h"
 #include "../include/xml/call/xml.h"
+#include "../include/xml/call/name.h"
 
 static const struct {
   const char *name;
@@ -165,13 +166,16 @@ err:
 }
 
 static bool
-xml__parse_check_pi(const char *text, size_t size, bool initial, size_t *offset) {
-  size_t end = 0;
+xml__parse_check_pi(const char *text, size_t size, bool initial, bool prefixes, size_t *offset) {
+  xml_parse_error_t error;
+  size_t            end = 0;
 
   while (end < size && !xml__ascii_space(text[end]))
     end++;
-  if (!xml__parse_check_name(text, end, false, offset))
+  if (xmlc_validate_name_span(text, end, prefixes ? XML_NCNAME : XML_NAME, &error) != XML_PARSE_OK) {
+    *offset = error.offset;
     return false;
+  }
 
   if (end == 3 && (text[0] | 32) == 'x'
       && (text[1] | 32) == 'm' && (text[2] | 32) == 'l') {

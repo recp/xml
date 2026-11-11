@@ -61,7 +61,9 @@ xmlc_parse_span_limited(const char               * __restrict contents,
 /* bounded parsing with lexical checks and the normal resource caps.
  * retains raw text/CDATA as with XML_PRESERVE_TEXT. input stays borrowed.
  * validates element and attribute names (QNames with XML_PREFIXES, Names
- * otherwise), PI target names, UTF-8/XML characters and value references.
+ * otherwise), PI targets (NCNames with XML_PREFIXES, Names otherwise),
+ * UTF-8/XML characters and value references. namespace PI targets cannot use
+ * a colon, even when that prefix is declared. PI data may still contain colons.
  * attribute values require single or double quotes and separators.
  * leading tag whitespace and spaced self-closing delimiters are rejected.
  * markup cannot interrupt an unfinished start tag, and closing tag names
@@ -101,8 +103,9 @@ xmlc_parse_span_checked(const char               * __restrict contents,
  * prefix/URI pairs and the ban on empty prefixed bindings. URI values use the
  * existing attribute decoder. default bindings may be empty; URI reference
  * syntax is not checked and no percent decoding/case folding is performed.
- * expanded-name attribute uniqueness and PI target NCNames are separate checks;
- * success here does not establish complete namespace-well-formed input.
+ * expanded-name attribute uniqueness is a separate check. PI target syntax is
+ * already checked before discard by checked XML_PREFIXES parsing; binding-only
+ * success does not establish complete namespace-well-formed input.
  *
  * max_work counts each tree/ancestor step, each attribute visit plus its name
  * length, each resolved prefix length and raw URI bytes per decoding pass.
@@ -143,8 +146,8 @@ xmlc_validate_namespace_bindings(const xml_doc_t *document, size_t max_work, con
  * optional invalid is NULL on success/argument failure, otherwise a borrowed
  * source cursor for the error or quota step. a duplicate reports the earliest
  * second occurrence within the first offending element visited. limit/range/
- * allocation failures may precede complete semantic validation. PI NCNames and
- * complete namespace-well-formed parsing remain separate gates.
+ * allocation failures may precede complete semantic validation. complete
+ * namespace/document grammar qualification remains a separate gate.
  */
 XML_EXPORT
 xml_parse_status_t

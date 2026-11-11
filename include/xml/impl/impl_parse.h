@@ -325,6 +325,7 @@ xml__parse(const char        * __restrict contents,
             if (!xml__parse_check_pi(checkedStart, (size_t)(end - checkedStart),
                                      checkedStart - contents == 2
                                        || (checkedStart - contents == 5 && !memcmp(contents, "\xef\xbb\xbf", 3)),
+                                     sepPrefixes,
                                      &invalidOffset)) {
               p = (char *)checkedStart + invalidOffset;
               goto err;

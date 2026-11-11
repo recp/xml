@@ -185,7 +185,7 @@ long_values(void) {
 static int
 arguments_and_scope(void) {
   const char *const sources[] = {
-    "<r xmlns:p='u' xmlns:q='u' p:a='1' q:a='2'/>", "<?p:q?><r/>",
+    "<r xmlns:p='u' xmlns:q='u' p:a='1' q:a='2'/>", "<?pi?><r/>",
   };
   xml_doc_t  *doc;
   const char *invalid = sources[0];
@@ -198,7 +198,7 @@ arguments_and_scope(void) {
   CHECK(!invalid);
   xmlc_free(doc);
 
-  /* binding validation does not claim expanded uniqueness or PI NCNames. */
+  /* binding validation does not claim expanded uniqueness. */
   for (i = 0; i < XML_ARR_LEN(sources); i++) {
     CHECK((doc = xmlc_parse_span_checked(sources[i], strlen(sources[i]), XML_READONLY | XML_PREFIXES, NULL, NULL)));
     CHECK(xmlc_validate_namespace_bindings(doc, SIZE_MAX, &invalid) == XML_PARSE_OK && !invalid);

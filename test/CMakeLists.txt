@@ -10,6 +10,10 @@ add_executable(xml-checked-test checked.c)
 target_link_libraries(xml-checked-test PRIVATE xml)
 add_test(NAME checked-input COMMAND xml-checked-test)
 
+add_executable(xml-processing-test processing.c)
+target_link_libraries(xml-processing-test PRIVATE xml)
+add_test(NAME processing-targets COMMAND xml-processing-test)
+
 add_executable(xml-namespace-test namespace.c)
 target_link_libraries(xml-namespace-test PRIVATE xml)
 add_test(NAME namespace-bindings COMMAND xml-namespace-test)
@@ -25,6 +29,7 @@ add_test(NAME namespace-attribute-allocations COMMAND xml-namespace-attributes-a
 add_executable(xml-checked-alloc-test alloc.c)
 target_include_directories(xml-checked-alloc-test PRIVATE "${PROJECT_SOURCE_DIR}/include")
 target_compile_definitions(xml-checked-alloc-test PRIVATE XML_TEST_CHECKED)
+target_link_libraries(xml-checked-alloc-test PRIVATE xml)
 add_test(NAME checked-allocation-failures COMMAND xml-checked-alloc-test)
 
 add_executable(xml-span-test span.c)
