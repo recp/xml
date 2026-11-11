@@ -32,6 +32,27 @@ typedef struct xml_markup_span_t {
 
 typedef xml_parse_status_t (*xml_markup_visitor_t)(void *context, const xml_markup_span_t *span);
 
+#define XML_SOURCE_SPANS 1
+
+typedef enum xml_source_kind_t {
+  XML_SOURCE_START = 0,
+  XML_SOURCE_EMPTY,
+  XML_SOURCE_END,
+  XML_SOURCE_TEXT,
+  XML_SOURCE_CDATA,
+  XML_SOURCE_COMMENT,
+  XML_SOURCE_PI,
+  XML_SOURCE_DECLARATION,
+  XML_SOURCE_BOM
+} xml_source_kind_t;
+
+typedef struct xml_source_span_t {
+  size_t            offset, size;
+  xml_source_kind_t kind;
+} xml_source_span_t;
+
+typedef xml_parse_status_t (*xml_source_visitor_t)(void *context, const xml_source_span_t *span);
+
 /*!
  * @brief parse xml string
  *
@@ -144,6 +165,28 @@ xmlc_visit_markup(const char           *contents,
                    size_t                size,
                    size_t                max_scan_bytes,
                    xml_markup_visitor_t  visitor,
+                   void                 *context,
+                   xml_parse_error_t    *error);
+
+/* project original checked XML_READONLY bytes into a complete source partition.
+ * same unchanged-source, callback ownership/status and prefix-read budget
+ * contract as xmlc_visit_markup; this does not validate XML or resolve names.
+ * START/EMPTY include the whole opening tag and attributes, END the closing
+ * tag, CDATA/comment/PI/declaration their delimiters, and BOM its three bytes.
+ * TEXT includes raw references and whitespace, also outside the root. an EMPTY
+ * has no separate END event. complete success covers every source byte once.
+ * no allocation, tree, recursion or retained state is introduced. callbacks
+ * may retain copied records only while keeping their source alive.
+ * a shortened scan can withhold trailing TEXT whose boundary is not known
+ * within the admitted prefix. no partial record is delivered. publish only
+ * after OK. malformed framing checks are defensive, not grammar validation.
+ */
+XML_EXPORT
+xml_parse_status_t
+xmlc_visit_source(const char           *contents,
+                   size_t                size,
+                   size_t                max_scan_bytes,
+                   xml_source_visitor_t  visitor,
                    void                 *context,
                    xml_parse_error_t    *error);
 
