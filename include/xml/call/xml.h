@@ -93,6 +93,34 @@ xmlc_parse_span_checked(const char               * __restrict contents,
                         const xml_parse_limits_t            *limits,
                         xml_parse_error_t                   *error);
 
+/* validate namespace 1.0 declarations and prefix bindings on a complete tree from
+ * xmlc_parse_span_checked with XML_PREFIXES. the tree and borrowed input must
+ * remain unchanged while this runs. this performs no allocation or recursion.
+ *
+ * checks local/inherited declarations, shadowing, implicit xml, reserved
+ * prefix/URI pairs and the ban on empty prefixed bindings. URI values use the
+ * existing attribute decoder. default bindings may be empty; URI reference
+ * syntax is not checked and no percent decoding/case folding is performed.
+ * expanded-name attribute uniqueness and PI target NCNames are separate checks;
+ * success here does not establish complete namespace-well-formed input.
+ *
+ * max_work counts each tree/ancestor step, each attribute visit plus its name
+ * length, each resolved prefix length and raw URI bytes per decoding pass.
+ * zero permits no work; SIZE_MAX is the largest cap. ancestor lookup can
+ * revisit attributes; a finite cap bounds that work with XML_PARSE_LIMIT.
+ * one root binding may reuse its boundness proof within this call; descendant
+ * declarations are still checked and no selected URI is cached or returned.
+ *
+ * returns OK, INVALID_ARGUMENT, INVALID_DATA or LIMIT. optional invalid receives
+ * NULL on success/argument failure, otherwise a borrowed source cursor at the
+ * failed name/value or work step. callers with the source base can compute an
+ * absolute offset. existing tokens, values, options and parser entries do not
+ * change; this checks bindings only and retains no resolved-name index.
+ */
+XML_EXPORT
+xml_parse_status_t
+xmlc_validate_namespace_bindings(const xml_doc_t *document, size_t max_work, const char **invalid);
+
 /*!
  * @brief frees xml document and its allocated memory
  */

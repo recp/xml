@@ -43,4 +43,5 @@ libxml_la_SOURCES=\
     src/xml.c \
     src/decode.c \
     src/name.c \
-    src/checked.c
+    src/checked.c \
+    src/namespace.c

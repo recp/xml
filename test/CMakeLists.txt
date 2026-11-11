@@ -10,6 +10,10 @@ add_executable(xml-checked-test checked.c)
 target_link_libraries(xml-checked-test PRIVATE xml)
 add_test(NAME checked-input COMMAND xml-checked-test)
 
+add_executable(xml-namespace-test namespace.c)
+target_link_libraries(xml-namespace-test PRIVATE xml)
+add_test(NAME namespace-bindings COMMAND xml-namespace-test)
+
 add_executable(xml-checked-alloc-test alloc.c)
 target_include_directories(xml-checked-alloc-test PRIVATE "${PROJECT_SOURCE_DIR}/include")
 target_compile_definitions(xml-checked-alloc-test PRIVATE XML_TEST_CHECKED)
