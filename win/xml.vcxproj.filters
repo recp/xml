@@ -33,6 +33,9 @@
     <ClCompile Include="..\src\namespace.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\namespace_attributes.c">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\xml\common.h">

@@ -24,6 +24,7 @@
     <ClCompile Include="..\src\name.c" />
     <ClCompile Include="..\src\checked.c" />
     <ClCompile Include="..\src\namespace.c" />
+    <ClCompile Include="..\src\namespace_attributes.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\xml\call\xml.h" />

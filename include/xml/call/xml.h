@@ -121,6 +121,38 @@ XML_EXPORT
 xml_parse_status_t
 xmlc_validate_namespace_bindings(const xml_doc_t *document, size_t max_work, const char **invalid);
 
+/* check expanded attribute uniqueness after checked XML_PREFIXES parsing and
+ * successful xmlc_validate_namespace_bindings. the tree/input must remain
+ * unchanged throughout. raw duplicates were checked by the parser; unprefixed,
+ * xml and xmlns attributes cannot alias ordinary bound prefixes in namespace
+ * 1.0. only ordinary prefixed attributes need this additional check.
+ *
+ * local names are grouped before effective URI lookup. nearest declarations
+ * select the URI, with normal attribute decoding and byte-exact equality; no
+ * percent decoding, case folding or Unicode normalization. unique local names
+ * need no URI lookup. copied entries are sorted without reordering tokens.
+ *
+ * max_work counts tree/ancestor steps, attribute visits plus name lengths,
+ * key comparisons plus equal-length key bytes and raw URI bytes per inspection
+ * or decoding pass. max_memory caps additional requested heap bytes, excluding
+ * allocator metadata, fixed stack, borrowed input and existing document pages.
+ * zero is a real cap; SIZE_MAX is the largest cap. up to eight candidates and
+ * 128 decoded URI bytes use fixed stack. larger scratch is released before
+ * return; nothing is retained. URI lookup can revisit ancestors within quota.
+ *
+ * optional invalid is NULL on success/argument failure, otherwise a borrowed
+ * source cursor for the error or quota step. a duplicate reports the earliest
+ * second occurrence within the first offending element visited. limit/range/
+ * allocation failures may precede complete semantic validation. PI NCNames and
+ * complete namespace-well-formed parsing remain separate gates.
+ */
+XML_EXPORT
+xml_parse_status_t
+xmlc_validate_expanded_attributes(const xml_doc_t  *document,
+                                  size_t            max_work,
+                                  size_t            max_memory,
+                                  const char      **invalid);
+
 /*!
  * @brief frees xml document and its allocated memory
  */
