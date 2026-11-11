@@ -19,6 +19,19 @@ typedef struct xml_resolved_name_t {
   size_t      local_size, namespace_size;
 } xml_resolved_name_t;
 
+typedef enum xml_markup_kind_t {
+  XML_MARKUP_COMMENT = 0,
+  XML_MARKUP_PI,
+  XML_MARKUP_DECLARATION
+} xml_markup_kind_t;
+
+typedef struct xml_markup_span_t {
+  size_t            offset, size;
+  xml_markup_kind_t kind;
+} xml_markup_span_t;
+
+typedef xml_parse_status_t (*xml_markup_visitor_t)(void *context, const xml_markup_span_t *span);
+
 /*!
  * @brief parse xml string
  *
@@ -99,6 +112,40 @@ xmlc_parse_span_checked(const char               * __restrict contents,
                         xml_options_t                        options,
                         const xml_parse_limits_t            *limits,
                         xml_parse_error_t                   *error);
+
+/* visit comments, processing instructions and the XML declaration in original
+ * source order, including before/after the root. contents must be the unchanged
+ * bytes of a complete document successfully parsed with xmlc_parse_span_checked
+ * and XML_READONLY. this is an optional lexical projection, not another XML
+ * validator. DTDs remain unsupported. an empty span enumerates nothing.
+ *
+ * offsets/sizes include complete delimiters and preserve raw spelling, quotes,
+ * references and line endings. CDATA lookalikes are skipped. in checked XML,
+ * raw '<' cannot occur in attribute values, so tag/attribute reparsing is not
+ * needed. no nodes, source copies, allocations or retained state are introduced.
+ * span is valid only during its callback; copy it to retain the record. bytes
+ * still borrow contents. the caller owns any persistent index/storage.
+ *
+ * max_scan_bytes admits an input prefix; this function reads no bytes beyond
+ * min(size, max_scan_bytes). a shorter prefix returns LIMIT at that boundary,
+ * delivering only spans completed within it. this counts unique input bytes,
+ * not instructions/time or callback work. callbacks are provisional until OK;
+ * publish retained results only after complete success. visitor is required.
+ * non-OK callback status is propagated unchanged at that span's starting offset.
+ * callbacks must not change the source. error/output must not alias the source.
+ *
+ * success reports OK at size. invalid arguments report offset zero; defensive
+ * malformed-markup checks may report INVALID_DATA on unvalidated input, but do
+ * not establish complete XML validity. no parser entry/option/layout changes.
+ */
+XML_EXPORT
+xml_parse_status_t
+xmlc_visit_markup(const char           *contents,
+                   size_t                size,
+                   size_t                max_scan_bytes,
+                   xml_markup_visitor_t  visitor,
+                   void                 *context,
+                   xml_parse_error_t    *error);
 
 /* validate namespace 1.0 declarations and prefix bindings on a complete tree from
  * xmlc_parse_span_checked with XML_PREFIXES. the tree and borrowed input must

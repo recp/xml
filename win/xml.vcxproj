@@ -23,6 +23,7 @@
     <ClCompile Include="..\src\decode.c" />
     <ClCompile Include="..\src\name.c" />
     <ClCompile Include="..\src\checked.c" />
+    <ClCompile Include="..\src\markup.c" />
     <ClCompile Include="..\src\namespace.c" />
     <ClCompile Include="..\src\namespace_attributes.c" />
   </ItemGroup>

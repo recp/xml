@@ -14,6 +14,10 @@ add_executable(xml-document-test document.c)
 target_link_libraries(xml-document-test PRIVATE xml)
 add_test(NAME document-grammar COMMAND xml-document-test)
 
+add_executable(xml-markup-test markup.c)
+target_link_libraries(xml-markup-test PRIVATE xml)
+add_test(NAME markup-spans COMMAND xml-markup-test)
+
 add_executable(xml-processing-test processing.c)
 target_link_libraries(xml-processing-test PRIVATE xml)
 add_test(NAME processing-targets COMMAND xml-processing-test)
@@ -62,6 +66,9 @@ add_test(NAME name-validation COMMAND xml-name-test)
 
 find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
+  add_test(NAME markup-reference
+           COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/markup_reference.py"
+                   $<TARGET_FILE:xml-markup-test>)
   add_test(NAME document-reference
            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/document_reference.py"
                    $<TARGET_FILE:xml-document-test>)

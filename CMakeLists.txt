@@ -41,7 +41,7 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
 # Target Start
-add_library(${PROJECT_NAME} ${XML_BUILD} src/xml.c src/decode.c src/name.c src/checked.c
+add_library(${PROJECT_NAME} ${XML_BUILD} src/xml.c src/decode.c src/name.c src/checked.c src/markup.c
                                       src/namespace.c src/namespace_attributes.c)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
