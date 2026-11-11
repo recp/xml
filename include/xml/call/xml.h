@@ -14,6 +14,11 @@ extern "C" {
 #include "../common.h"
 #include "../xml.h"
 
+typedef struct xml_resolved_name_t {
+  const char *local, *namespace_value;
+  size_t      local_size, namespace_size;
+} xml_resolved_name_t;
+
 /*!
  * @brief parse xml string
  *
@@ -123,6 +128,39 @@ xmlc_parse_span_checked(const char               * __restrict contents,
 XML_EXPORT
 xml_parse_status_t
 xmlc_validate_namespace_bindings(const xml_doc_t *document, size_t max_work, const char **invalid);
+
+/* resolve an element name (attribute == NULL) or one of its attribute names on
+ * a checked XML_PREFIXES tree after successful namespace binding validation.
+ * attribute must belong to element; the complete tree/input must remain valid
+ * and unchanged throughout. this does not repeat lexical/binding validation.
+ *
+ * local is the literal local-name span. namespace_value is the nearest selected
+ * declaration's RAW attribute value, not its decoded URI. use XML_DECODE_ATTRIBUTE
+ * before URI comparison. xml and xmlns return their implicit, plain URI values.
+ * absent/empty default bindings and unprefixed ordinary attributes have a NULL
+ * namespace_value and zero namespace_size. default namespaces apply to elements
+ * only. namespace declarations themselves resolve to the xmlns namespace.
+ *
+ * spans borrow the input, except implicit URI strings with static lifetime.
+ * no allocation, recursion, mutation or retained state occurs. resolving again
+ * after a valid edit observes the current declaration; no binding proof/cache
+ * is reused as a URI. max_work charges one query plus qualified-name bytes,
+ * each visited ancestor and each inspected attribute plus its name bytes.
+ * zero permits no work; SIZE_MAX is the largest cap. URI decoding has separate
+ * costs and is not performed or charged here.
+ *
+ * name is required and reset to zero on failure. optional invalid is NULL on
+ * success/argument failure, otherwise a borrowed source cursor at the failed
+ * query/attribute step. an unbound queried prefix returns INVALID_DATA; quota
+ * exhaustion returns LIMIT. outputs must not overlap the tree/input.
+ */
+XML_EXPORT
+xml_parse_status_t
+xmlc_resolve_name(const xml_t          *element,
+                  const xml_attr_t     *attribute,
+                  size_t                max_work,
+                  xml_resolved_name_t  *name,
+                  const char          **invalid);
 
 /* check expanded attribute uniqueness after checked XML_PREFIXES parsing and
  * successful xmlc_validate_namespace_bindings. the tree/input must remain

@@ -18,6 +18,10 @@ add_executable(xml-namespace-test namespace.c)
 target_link_libraries(xml-namespace-test PRIVATE xml)
 add_test(NAME namespace-bindings COMMAND xml-namespace-test)
 
+add_executable(xml-namespace-resolve-test namespace_resolve.c)
+target_link_libraries(xml-namespace-resolve-test PRIVATE xml)
+add_test(NAME namespace-resolution COMMAND xml-namespace-resolve-test)
+
 add_executable(xml-namespace-attributes-test namespace_attributes.c)
 target_link_libraries(xml-namespace-attributes-test PRIVATE xml)
 add_test(NAME namespace-attributes COMMAND xml-namespace-attributes-test)

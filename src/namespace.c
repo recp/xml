@@ -222,3 +222,98 @@ err:
     *invalid = work.cursor;
   return status;
 }
+
+XML_EXPORT
+xml_parse_status_t
+xmlc_resolve_name(const xml_t          *element,
+                  const xml_attr_t     *attribute,
+                  size_t                max_work,
+                  xml_resolved_name_t  *name,
+                  const char          **invalid) {
+  xml_resolved_name_t resolved = {0};
+  Work               work = {NULL, NULL, max_work};
+  const xml_t       *scope;
+  const xml_attr_t  *binding;
+  const char        *prefix, *declared, *cursor, *colon;
+  size_t             size, declaredSize, nameSize;
+  xml_parse_status_t status = XML_PARSE_OK;
+
+  if (invalid)
+    *invalid = NULL;
+  if (name)
+    *name = resolved;
+  if (!element || element->type != XML_ELEMENT || !name)
+    return XML_PARSE_INVALID_ARGUMENT;
+
+  cursor = attribute ? attribute->name : element->tag;
+  if (attribute)
+    nameSize = attribute->namesize;
+  else
+    nameSize = (size_t)element->prefixsize + element->tagsize + (element->prefixsize != 0);
+  if (!consume(&work, nameSize + 1, cursor)) {
+    status = XML_PARSE_LIMIT;
+    goto err;
+  }
+
+  if (attribute) {
+    resolved.local      = attribute->name;
+    resolved.local_size = attribute->namesize;
+    colon               = memchr(attribute->name, ':', attribute->namesize);
+    prefix              = attribute->name;
+    size                = colon ? (size_t)(colon - prefix) : 0;
+    if (colon) {
+      resolved.local      = colon + 1;
+      resolved.local_size -= size + 1;
+    }
+  } else {
+    resolved.local      = element->tag;
+    resolved.local_size = element->tagsize;
+    prefix              = element->prefix;
+    size                = element->prefixsize;
+  }
+
+  if (size == 3 && !memcmp(prefix, "xml", 3)) {
+    resolved.namespace_value = xmlNamespace;
+    resolved.namespace_size  = sizeof(xmlNamespace) - 1;
+  } else if ((size == 5 && !memcmp(prefix, "xmlns", 5))
+             || (attribute && !size && nameSize == 5 && !memcmp(cursor, "xmlns", 5))) {
+    resolved.namespace_value = xmlnsNamespace;
+    resolved.namespace_size  = sizeof(xmlnsNamespace) - 1;
+  } else if (size || !attribute) {
+    for (scope = element; scope; scope = scope->parent) {
+      if (!consume(&work, 1, cursor)) {
+        status = XML_PARSE_LIMIT;
+        goto err;
+      }
+      for (binding = scope->attr; binding; binding = binding->next) {
+        if (!consume(&work, (size_t)binding->namesize + 1, binding->name)) {
+          status = XML_PARSE_LIMIT;
+          goto err;
+        }
+        if (!declaration(binding, &declared, &declaredSize) || declaredSize != size
+            || (size && memcmp(declared, prefix, size)))
+          continue;
+
+        if (binding->valsize) {
+          resolved.namespace_value = binding->val;
+          resolved.namespace_size  = binding->valsize;
+        }
+        goto done;
+      }
+    }
+    if (size) {
+      work.cursor = cursor;
+      status      = XML_PARSE_INVALID_DATA;
+      goto err;
+    }
+  }
+
+done:
+  *name = resolved;
+  return XML_PARSE_OK;
+
+err:
+  if (invalid)
+    *invalid = work.cursor;
+  return status;
+}
