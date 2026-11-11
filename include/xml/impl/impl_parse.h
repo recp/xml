@@ -318,7 +318,10 @@ xml__parse(const char        * __restrict contents,
               p = end + 1;
             }
 #if defined(XML__PARSE_CHECKED)
-            if (!xml__parse_check_pi(checkedStart, (size_t)(end - checkedStart), &invalidOffset)) {
+            if (!xml__parse_check_pi(checkedStart, (size_t)(end - checkedStart),
+                                     checkedStart - contents == 2
+                                       || (checkedStart - contents == 5 && !memcmp(contents, "\xef\xbb\xbf", 3)),
+                                     &invalidOffset)) {
               p = (char *)checkedStart + invalidOffset;
               goto err;
             }

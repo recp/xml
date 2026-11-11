@@ -65,6 +65,11 @@ xmlc_parse_span_limited(const char               * __restrict contents,
  * attribute values require single or double quotes and separators.
  * leading tag whitespace and spaced self-closing delimiters are rejected.
  * a leading UTF-8 BOM is accepted and offsets include it.
+ * an XML declaration must appear first (after an optional BOM), with ordered
+ * version, optional encoding and optional standalone fields. version 1.x is
+ * processed with XML 1.0 rules. only UTF-8 encoding declarations are supported;
+ * other encodings return XML_PARSE_INVALID_DATA at the value. standalone is
+ * yes/no. other case variants of the reserved PI target xml are rejected.
  *
  * comments/PI remain skipped, values retain raw spelling and no entities are
  * decoded into the tree. repeated attribute names are rejected at the second
@@ -72,8 +77,8 @@ xmlc_parse_span_limited(const char               * __restrict contents,
  * larger lists temporarily allocate one pointer per attribute, counted
  * against the remaining memory cap. the buffer is released before parsing
  * content or reporting an error. token order and retained memory are preserved.
- * namespace bindings, expanded-name duplicates and full XML
- * declaration/PI/document grammar remain separate. DTDs are unsupported.
+ * namespace bindings, expanded-name duplicates, complete document grammar
+ * and meaningful markup retention remain separate. DTDs are unsupported.
  * failures return no document and report the offending source byte. limit
  * and allocation behavior follows xmlc_parse_span_limited. this compiled
  * entry reuses the parser state machine and existing lexical validators.

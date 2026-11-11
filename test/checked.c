@@ -25,6 +25,57 @@ fixtures(void) {
   const Fixture fixtures[] = {
     {"<svg/>", true},
     {"<?xml version='1.0'?><svg xmlns='http://www.w3.org/2000/svg'><text>A&amp;&#x1F642;</text></svg>", true},
+    {"<?xml version=\"1.0\"?><r/>", true},
+    {"<?xml \tversion \r\n= '1.0' \t?><r/>", true},
+    {"<?xml version='1.0' encoding='UTF-8'?><r/>", true},
+    {"<?xml version='1.0' encoding=\"uTf-8\" standalone='yes' ?><r/>", true},
+    {"<?xml version='1.0' standalone='no'?><r/>", true},
+    {"<?xml version='1.0' standalone=\"yes\"?><r/>", true},
+    {"<?xml version='1.1'?><r/>", true},
+    {"<?xml version='1.00'?><r/>", true},
+    {"<?xml version='1.123'?><r/>", true},
+    {"\xef\xbb\xbf<?xml version='1.0' encoding='UTF-8'?><r/>", true},
+    {"<?p?><r><?p x?y &unknown; <z?>text</r><?p ?>", true},
+    {"<?xml-stylesheet type='text/css' href='x.css'?><r/>", true},
+    {"<r><?XML-stylesheet?></r>", true},
+    {"<?\xcf\x80 data?><r/>", true},
+    {"<?xml?><r/>", false},
+    {"<?xml ?><r/>", false},
+    {"<?XML version='1.0'?><r/>", false},
+    {"<?xMl version='1.0'?><r/>", false},
+    {"<?xml version='1.0'?>", false},
+    {"<?p?>", false},
+    {" <?xml version='1.0'?><r/>", false},
+    {"\xef\xbb\xbf <?xml version='1.0'?><r/>", false},
+    {"<!--c--><?xml version='1.0'?><r/>", false},
+    {"<?p?><?xml version='1.0'?><r/>", false},
+    {"<?xml version='1.0'?><?xml version='1.0'?><r/>", false},
+    {"<r><?xml version='1.0'?></r>", false},
+    {"<r/><?xml version='1.0'?>", false},
+    {"<?xml encoding='UTF-8'?><r/>", false},
+    {"<?xml standalone='yes'?><r/>", false},
+    {"<?xml Version='1.0'?><r/>", false},
+    {"<?xml version '1.0'?><r/>", false},
+    {"<?xml version=1.0?><r/>", false},
+    {"<?xml version='1.0\"?><r/>", false},
+    {"<?xml version=''?><r/>", false},
+    {"<?xml version='2.0'?><r/>", false},
+    {"<?xml version='1.'?><r/>", false},
+    {"<?xml version='1.x'?><r/>", false},
+    {"<?xml version='1.0 '?><r/>", false},
+    {"<?xml version='&#49;.0'?><r/>", false},
+    {"<?xml version='1.0'encoding='UTF-8'?><r/>", false},
+    {"<?xml version='1.0' version='1.0'?><r/>", false},
+    {"<?xml version='1.0' standalone='yes' encoding='UTF-8'?><r/>", false},
+    {"<?xml version='1.0' encoding='UTF-8' encoding='UTF-8'?><r/>", false},
+    {"<?xml version='1.0' encoding=UTF-8?><r/>", false},
+    {"<?xml version='1.0' standalone='Yes'?><r/>", false},
+    {"<?xml version='1.0' standalone='true'?><r/>", false},
+    {"<?xml version='1.0' standalone=''?><r/>", false},
+    {"<?xml version='1.0' standalone='yes' standalone='no'?><r/>", false},
+    {"<?xml version='1.0' extra='x'?><r/>", false},
+    {"<?xml version='1.0'/><r/>", false},
+    {"<?p?data?><r/>", false},
     {"<r a='x' b=\"y\"> text &#9; <![CDATA[<&unknown;]]><!--x]]>y--><?p x]]>y?></r>", true},
     {"<r><ns:item ns:a='&amp; &lt; &gt; &quot; &apos; &#9; &#10; &#13;'/></r>", true},
     {"\xef\xbb\xbf<r>\r\n<e/> </r>", true},
@@ -98,6 +149,25 @@ fixtures(void) {
       CHECK(error.offset <= prefix && !memcmp(input, fixtures[i].source, prefix));
       xmlc_free(doc);
       free(input);
+    }
+  }
+  return 0;
+}
+
+static int
+encoding_limits(void) {
+  const char *const encodings[] = {"UTF-16", "US-ASCII", "ISO-8859-1", "UTF8", "", "UTF-8 "};
+  char              source[128];
+  xml_parse_error_t  error;
+  xml_doc_t         *doc;
+  size_t            i, size;
+  unsigned          mode;
+
+  for (mode = 0; mode < 16; mode++) {
+    for (i = 0; i < XML_ARR_LEN(encodings); i++) {
+      size = (size_t)snprintf(source, sizeof(source), "<?xml version='1.0' encoding='%s'?><r/>", encodings[i]);
+      doc = xmlc_parse_span_checked(source, size, (xml_options_t)mode, NULL, &error);
+      CHECK(!doc && error.status == XML_PARSE_INVALID_DATA && error.offset == 30);
     }
   }
   return 0;
@@ -209,8 +279,12 @@ offsets(void) {
   const char *const sources[] = {
     "<1r/>", "<r a='&bad;'/>", "<r>ok\x01</r>", "<r a='v'b='x'/>",
     "< r/>", "<r/ >", "<r><?1p?></r>", "\xef\xbb\xbf<r a='&bad;'/>",
+    "<?XML version='1.0'?><r/>", "<?xml?><r/>",
+    " <?xml version='1.0'?><r/>", "<r><?xml version='1.0'?></r>",
+    "\xef\xbb\xbf <?xml version='1.0'?><r/>",
+    "<?xml version='2.0'?><r/>", "<?xml version='1.x'?><r/>",
   };
-  const size_t offsets[] = {1, 6, 5, 8, 1, 2, 5, 9};
+  const size_t offsets[] = {1, 6, 5, 8, 1, 2, 5, 9, 2, 5, 3, 5, 6, 15, 17};
   xml_parse_error_t error;
   xml_doc_t        *doc;
   size_t            i;
@@ -274,6 +348,7 @@ limits(void) {
 int
 main(void) {
   CHECK(!fixtures());
+  CHECK(!encoding_limits());
   CHECK(!attribute_lists());
   CHECK(!scratch_limits());
   CHECK(!offsets());

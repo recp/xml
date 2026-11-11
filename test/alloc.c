@@ -270,6 +270,8 @@ main(void) {
   memcpy(source + offset, "</r>", 5);
   if (check_failures(source))
     return 4;
+  if (check_failures("<?xml version='1.0' encoding='UTF-8' standalone='yes'?><r/>"))
+    return 5;
 #endif
 
   /* retained CDATA fills another token page in preserve mode. */

@@ -18,7 +18,7 @@ static bool
 xml__parse_check_chars(const char *text, size_t size, size_t *offset);
 
 static bool
-xml__parse_check_pi(const char *text, size_t size, size_t *offset);
+xml__parse_check_pi(const char *text, size_t size, bool initial, size_t *offset);
 
 struct xml_t;
 struct xml_parse_budget_t;
@@ -32,6 +32,11 @@ xml__parse_check_attributes(const struct xml_t *element,
 #define XML__PARSE_CHECKED
 #include "../include/xml/name.h"
 #include "../include/xml/call/xml.h"
+
+static const struct {
+  const char *name;
+  size_t      size;
+} declarationFields[] = {{"version", 7}, {"encoding", 8}, {"standalone", 10}};
 
 static bool
 xml__parse_check_name(const char *text, size_t size, bool qualified, size_t *offset) {
@@ -77,7 +82,90 @@ xml__parse_check_chars(const char *text, size_t size, size_t *offset) {
 }
 
 static bool
-xml__parse_check_pi(const char *text, size_t size, size_t *offset) {
+check_declaration(const char *text, size_t size, size_t *offset) {
+  size_t   i = 3, start, end;
+  unsigned field;
+  char     quote;
+
+  for (field = 0; field < XML_ARR_LEN(declarationFields); field++) {
+    if (field && i == size)
+      return true;
+    if (i == size || !xml__ascii_space(text[i]))
+      goto err;
+
+    do {
+      i++;
+    } while (i < size && xml__ascii_space(text[i]));
+    if (i == size) {
+      if (field)
+        return true;
+      goto err;
+    }
+
+    /* encoding is optional before standalone. */
+    if (field == 1 && text[i] == 's')
+      field = 2;
+    if (size - i < declarationFields[field].size
+        || memcmp(text + i, declarationFields[field].name, declarationFields[field].size))
+      goto err;
+
+    i += declarationFields[field].size;
+    while (i < size && xml__ascii_space(text[i]))
+      i++;
+    if (i == size || text[i] != '=')
+      goto err;
+
+    i++;
+    while (i < size && xml__ascii_space(text[i]))
+      i++;
+    if (i == size || (text[i] != '\'' && text[i] != '"'))
+      goto err;
+
+    quote = text[i++];
+    start = i;
+    while (i < size && text[i] != quote)
+      i++;
+    if (i == size)
+      goto err;
+
+    end = i;
+    if (field == 0) {
+      if (end - start < 3 || text[start] != '1' || text[start + 1] != '.') {
+        i = start;
+        goto err;
+      }
+      for (i = start + 2; i < end; i++) {
+        if (text[i] < '0' || text[i] > '9')
+          goto err;
+      }
+    } else if (field == 1) {
+      /* this entry parses UTF-8 bytes and performs no transcoding. */
+      if (end - start != 5 || (text[start] | 32) != 'u'
+          || (text[start + 1] | 32) != 't' || (text[start + 2] | 32) != 'f'
+          || text[start + 3] != '-' || text[start + 4] != '8') {
+        i = start;
+        goto err;
+      }
+    } else if (!((end - start == 3 && !memcmp(text + start, "yes", 3))
+                 || (end - start == 2 && !memcmp(text + start, "no", 2)))) {
+      i = start;
+      goto err;
+    }
+    i = end + 1;
+  }
+
+  while (i < size && xml__ascii_space(text[i]))
+    i++;
+  if (i == size)
+    return true;
+
+err:
+  *offset = i;
+  return false;
+}
+
+static bool
+xml__parse_check_pi(const char *text, size_t size, bool initial, size_t *offset) {
   size_t end = 0;
 
   while (end < size && !xml__ascii_space(text[end]))
@@ -85,6 +173,14 @@ xml__parse_check_pi(const char *text, size_t size, size_t *offset) {
   if (!xml__parse_check_name(text, end, false, offset))
     return false;
 
+  if (end == 3 && (text[0] | 32) == 'x'
+      && (text[1] | 32) == 'm' && (text[2] | 32) == 'l') {
+    *offset = 0;
+    if (!initial || memcmp(text, "xml", 3))
+      return false;
+
+    return check_declaration(text, size, offset);
+  }
   return xml__parse_check_chars(text, size, offset);
 }
 
