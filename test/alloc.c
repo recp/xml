@@ -37,7 +37,11 @@ test_free(void *pointer) {
 
 #define calloc test_calloc
 #define free test_free
+#if defined(XML_TEST_CHECKED)
+#  include "../src/checked.c"
+#else
 #include <xml/xml.h>
+#endif
 #undef calloc
 #undef free
 
@@ -45,12 +49,17 @@ static xml_doc_t*
 parse(unsigned api, char *copy, size_t size, unsigned mode, xml_parse_error_t *error) {
   const xml_parse_limits_t limits = {SIZE_MAX, SIZE_MAX, SIZE_MAX, SIZE_MAX};
 
+#if defined(XML_TEST_CHECKED)
+  (void)api;
+  return xmlc_parse_span_checked(copy, size, (xml_options_t)mode, &limits, error);
+#else
   switch (api) {
     case 0: return xml_parse(copy, (xml_options_t)mode);
     case 1: return xml_parse_span(copy, size, (xml_options_t)mode, error);
     case 2: return xml_parse_span_limited(copy, size, (xml_options_t)mode, NULL, error);
     default: return xml_parse_span_limited(copy, size, (xml_options_t)mode, &limits, error);
   }
+#endif
 }
 
 static int
@@ -81,7 +90,11 @@ check_caps(const char *source) {
         }
         calls = failAt = bytes = 0;
         memcpy(copy, source, size);
+#if defined(XML_TEST_CHECKED)
+        doc = xmlc_parse_span_checked(copy, size, (xml_options_t)mode, &limits, &error);
+#else
         doc = xml_parse_span_limited(copy, size, (xml_options_t)mode, &limits, &error);
+#endif
         if (bytes > limits.max_memory_bytes || error.offset > size
             || (!doc && error.status != XML_PARSE_LIMIT)
             || (doc && error.status != XML_PARSE_OK)
@@ -144,7 +157,11 @@ check_failures(const char *source) {
     }
   }
   free(copy);
+#if defined(XML_TEST_CHECKED)
+  printf("all %zu checked allocation failures, 16 modes, release prior pages: pass\n", allocationCount);
+#else
   printf("all %zu allocation failures, 16 modes, legacy/span/limited APIs release prior pages: pass\n", allocationCount);
+#endif
   return check_caps(source);
 }
 

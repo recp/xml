@@ -42,4 +42,5 @@ xml_impl_HEADERS = include/xml/impl/impl_mem.h \
 libxml_la_SOURCES=\
     src/xml.c \
     src/decode.c \
-    src/name.c
+    src/name.c \
+    src/checked.c

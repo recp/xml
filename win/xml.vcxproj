@@ -22,6 +22,7 @@
     <ClCompile Include="..\src\xml.c" />
     <ClCompile Include="..\src\decode.c" />
     <ClCompile Include="..\src\name.c" />
+    <ClCompile Include="..\src\checked.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\xml\call\xml.h" />

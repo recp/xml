@@ -6,6 +6,15 @@ add_executable(xml-alloc-test alloc.c)
 target_include_directories(xml-alloc-test PRIVATE "${PROJECT_SOURCE_DIR}/include")
 add_test(NAME allocation-failures COMMAND xml-alloc-test)
 
+add_executable(xml-checked-test checked.c)
+target_link_libraries(xml-checked-test PRIVATE xml)
+add_test(NAME checked-input COMMAND xml-checked-test)
+
+add_executable(xml-checked-alloc-test alloc.c)
+target_include_directories(xml-checked-alloc-test PRIVATE "${PROJECT_SOURCE_DIR}/include")
+target_compile_definitions(xml-checked-alloc-test PRIVATE XML_TEST_CHECKED)
+add_test(NAME checked-allocation-failures COMMAND xml-checked-alloc-test)
+
 add_executable(xml-span-test span.c)
 target_link_libraries(xml-span-test PRIVATE xml)
 add_test(NAME bounded-input COMMAND xml-span-test)

@@ -58,6 +58,29 @@ xmlc_parse_span_limited(const char               * __restrict contents,
                         const xml_parse_limits_t            *limits,
                         xml_parse_error_t                   *error);
 
+/* bounded parsing with lexical checks and the normal resource caps.
+ * retains raw text/CDATA as with XML_PRESERVE_TEXT. input stays borrowed.
+ * validates element and attribute names (QNames with XML_PREFIXES, Names
+ * otherwise), PI target names, UTF-8/XML characters and value references.
+ * attribute values require single or double quotes and separators.
+ * leading tag whitespace and spaced self-closing delimiters are rejected.
+ * a leading UTF-8 BOM is accepted and offsets include it.
+ *
+ * comments/PI remain skipped, values retain raw spelling and no entities are
+ * decoded into the tree. duplicate attributes, namespace bindings and full
+ * XML declaration/PI/document grammar remain separate. DTDs are unsupported.
+ * failures return no document and report the offending source byte. limit
+ * and allocation behavior follows xmlc_parse_span_limited. this compiled
+ * entry reuses the parser state machine and existing lexical validators.
+ */
+XML_EXPORT
+xml_doc_t*
+xmlc_parse_span_checked(const char               * __restrict contents,
+                        size_t                               size,
+                        xml_options_t                        options,
+                        const xml_parse_limits_t            *limits,
+                        xml_parse_error_t                   *error);
+
 /*!
  * @brief frees xml document and its allocated memory
  */

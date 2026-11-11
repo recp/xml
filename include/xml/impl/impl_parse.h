@@ -81,6 +81,11 @@ xml__parse(const char        * __restrict contents,
 
   xml_parse_status_t status = XML_PARSE_INVALID_DATA;
 
+#if defined(XML__PARSE_CHECKED)
+  const char  *checkedStart;
+  size_t       invalidOffset;
+#endif
+
   uint32_t     remaining;
   char        *p, *end, c, quote;
   bool         foundQuote, reverse, sepPrefixes, readonly, preserve, complete = false;
@@ -110,6 +115,12 @@ xml__parse(const char        * __restrict contents,
     return NULL;
   }
   p              = (char *)contents;
+#if defined(XML__PARSE_CHECKED)
+  if (limit && (size_t)(limit - p) >= 3 && !memcmp(p, "\xef\xbb\xbf", 3)) {
+    p += 3;
+    c  = xml__parse_char(p, limit, 0);
+  }
+#endif
 
   memset(&tmproot, 0, sizeof(tmproot));
   tmproot.type   = XML_ELEMENT;
@@ -153,6 +164,10 @@ xml__parse(const char        * __restrict contents,
       case '\r':
       case '\n':
       case '\t':
+#if defined(XML__PARSE_CHECKED)
+        if (pos == begintag)
+          goto err;
+#endif
         do {
           c = xml__parse_char(++p, limit, 0);
         } while (c == ' ' || c == '\r' || c == '\n' || c == '\t');
@@ -188,6 +203,9 @@ xml__parse(const char        * __restrict contents,
           p += preserve ? 3 : 2;
           c  = xml__parse_char(p, limit, 0);
           c2 = '\0';
+#if defined(XML__PARSE_CHECKED)
+          checkedStart = p;
+#endif
 
           do {
             if (c == '\0')
@@ -201,6 +219,12 @@ xml__parse(const char        * __restrict contents,
             
           } while (!(c1 == '-' && c2 == '-' && c == '>'));
 
+#if defined(XML__PARSE_CHECKED)
+          if (!xml__parse_check_chars(checkedStart, (size_t)(p - checkedStart) - 2, &invalidOffset)) {
+            p = (char *)checkedStart + invalidOffset;
+            goto err;
+          }
+#endif
           pos = beginel;
           if (preserve)
             pos = obj == &tmproot ? unknown : content;
@@ -234,6 +258,12 @@ xml__parse(const char        * __restrict contents,
             if ((size_t)(end - s) > UINT32_MAX)
               goto range;
 
+#if defined(XML__PARSE_CHECKED)
+            if (!xml__parse_check_chars(s, (size_t)(end - s), &invalidOffset)) {
+              p = (char *)s + invalidOffset;
+              goto err;
+            }
+#endif
             val = xml__parse_text(doc, obj, s, readonly, reverse, budget);
             if (!val)
               goto oom;
@@ -274,6 +304,9 @@ xml__parse(const char        * __restrict contents,
         if (pos == begintag) {
           if (preserve) {
             p++;
+#if defined(XML__PARSE_CHECKED)
+            checkedStart = p;
+#endif
             for (;;) {
               if (!(end = xml__parse_find(p, '?', limit)))
                 goto err;
@@ -283,6 +316,12 @@ xml__parse(const char        * __restrict contents,
 
               p = end + 1;
             }
+#if defined(XML__PARSE_CHECKED)
+            if (!xml__parse_check_pi(checkedStart, (size_t)(end - checkedStart), &invalidOffset)) {
+              p = (char *)checkedStart + invalidOffset;
+              goto err;
+            }
+#endif
             p   = end + 1;
             pos = obj == &tmproot ? unknown : content;
             break;
@@ -301,6 +340,10 @@ xml__parse(const char        * __restrict contents,
         }
         break;
       case '/':
+#if defined(XML__PARSE_CHECKED)
+        if (pos != begintag && xml__parse_char(p, limit, 1) != '>')
+          goto err;
+#endif
         switch (pos) {
           case begintag:
             /* end xml tag */
@@ -439,6 +482,9 @@ xml__parse(const char        * __restrict contents,
             parent->val = obj;
             obj->parent = parent;
             obj->tag    = p;
+#if defined(XML__PARSE_CHECKED)
+            checkedStart = p;
+#endif
 
             do {
               if (c == '\0')
@@ -462,10 +508,20 @@ xml__parse(const char        * __restrict contents,
               goto range;
 
             obj->tagsize = (uint16_t)(p - obj->tag);
-            
+#if defined(XML__PARSE_CHECKED)
+            if (!xml__parse_check_name(checkedStart, (size_t)(p - checkedStart), sepPrefixes, &invalidOffset)) {
+              p = (char *)checkedStart + invalidOffset;
+              goto err;
+            }
+#endif
+
             if (c == '>') {
               pos = beginel;
             } else if (c == '/') {
+#if defined(XML__PARSE_CHECKED)
+              if (xml__parse_char(p, limit, 1) != '>')
+                goto err;
+#endif
               pos = endtag;
               
               if (!readonly) {
@@ -490,6 +546,10 @@ xml__parse(const char        * __restrict contents,
             p--;
             break;
           case beginattr:
+#if defined(XML__PARSE_CHECKED)
+            if (c == '"' || c == '\'' || c == '`')
+              goto err;
+#endif
             attr = xml__impl_calloc_budget(doc, sizeof(xml_attr_t), budget);
             if (!attr)
               goto oom;
@@ -529,6 +589,12 @@ xml__parse(const char        * __restrict contents,
               goto range;
 
             attr->namesize = (uint16_t)(end - attr->name);
+#if defined(XML__PARSE_CHECKED)
+            if (!xml__parse_check_name(attr->name, attr->namesize, sepPrefixes, &invalidOffset)) {
+              p = (char *)attr->name + invalidOffset;
+              goto err;
+            }
+#endif
             if (!readonly)
               *end = '\0';
 
@@ -549,6 +615,10 @@ xml__parse(const char        * __restrict contents,
             while (xml__ascii_space(c))
               c = xml__parse_char(++p, limit, 0);
 
+#if defined(XML__PARSE_CHECKED)
+            if (c != '"' && c != '\'')
+              goto err;
+#endif
             if ((foundQuote = (c == '"' || c == '\'' || c == '`'))) {
               quote          = c;
               attr->valquote = c;
@@ -582,6 +652,15 @@ xml__parse(const char        * __restrict contents,
               goto range;
 
             attr->valsize = (uint32_t)(end - attr->val);
+#if defined(XML__PARSE_CHECKED)
+            if (!xml__parse_check_value(attr->val, attr->valsize, true, &invalidOffset)) {
+              p = (char *)attr->val + invalidOffset;
+              goto err;
+            }
+            if (!xml__ascii_space(xml__parse_char(p, limit, 0))
+                && xml__parse_char(p, limit, 0) != '/' && xml__parse_char(p, limit, 0) != '>')
+              goto err;
+#endif
             if (!readonly)
               *end = '\0';
 
@@ -612,6 +691,12 @@ xml__parse(const char        * __restrict contents,
             if ((size_t)(p - (char *)s) > UINT32_MAX)
               goto range;
 
+#if defined(XML__PARSE_CHECKED)
+            if (!xml__parse_check_value(s, (size_t)(p - s), false, &invalidOffset)) {
+              p = (char *)s + invalidOffset;
+              goto err;
+            }
+#endif
             val->valsize = (uint32_t)(p - s);
             p--;
             break;
