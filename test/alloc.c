@@ -11,6 +11,43 @@
 
 static size_t calls, failAt, live, bytes;
 
+#if defined(XML_TEST_CHECKED)
+static void  *pointers[128];
+static size_t sizes[128], liveBytes;
+
+static void
+record_allocation(void *pointer, size_t size) {
+  size_t i;
+
+  for (i = 0; i < 128; i++) {
+    if (!pointers[i]) {
+      pointers[i] = pointer;
+      sizes[i]    = size;
+      liveBytes  += size;
+      if (liveBytes > bytes)
+        bytes = liveBytes;
+      return;
+    }
+  }
+  abort();
+}
+
+static void*
+test_malloc(size_t size) {
+  void *result;
+
+  if (++calls == failAt)
+    return NULL;
+
+  result = malloc(size);
+  if (result) {
+    live++;
+    record_allocation(result, size);
+  }
+  return result;
+}
+#endif
+
 static void*
 test_calloc(size_t count, size_t size) {
   void *result;
@@ -21,7 +58,11 @@ test_calloc(size_t count, size_t size) {
   result = calloc(count, size);
   if (result) {
     live++;
+#if defined(XML_TEST_CHECKED)
+    record_allocation(result, count * size);
+#else
     bytes += count * size;
+#endif
   }
 
   return result;
@@ -29,16 +70,33 @@ test_calloc(size_t count, size_t size) {
 
 static void
 test_free(void *pointer) {
-  if (pointer)
-    live--;
+#if defined(XML_TEST_CHECKED)
+  size_t i;
+#endif
 
+  if (pointer) {
+    live--;
+#if defined(XML_TEST_CHECKED)
+    for (i = 0; i < 128; i++) {
+      if (pointers[i] == pointer) {
+        liveBytes  -= sizes[i];
+        pointers[i] = NULL;
+        break;
+      }
+    }
+    if (i == 128)
+      abort();
+#endif
+  }
   free(pointer);
 }
 
 #define calloc test_calloc
 #define free test_free
 #if defined(XML_TEST_CHECKED)
+#  define malloc test_malloc
 #  include "../src/checked.c"
+#  undef malloc
 #else
 #include <xml/xml.h>
 #endif
@@ -169,6 +227,9 @@ int
 main(void) {
   char   source[32768];
   size_t i, offset;
+#if defined(XML_TEST_CHECKED)
+  size_t attribute;
+#endif
 
   memcpy(source, "<r>", 3u);
   for (i = 0u; i < 2000u; i++)
@@ -196,6 +257,20 @@ main(void) {
   memcpy(source + 4091u, "text</r>", 9u);
   if (check_failures(source))
     return 3;
+
+#if defined(XML_TEST_CHECKED)
+  offset = (size_t)snprintf(source, sizeof(source), "<r>");
+  for (i = 0; i < 2; i++) {
+    offset += (size_t)snprintf(source + offset, sizeof(source) - offset, "<n ");
+    for (attribute = 0; attribute < 128; attribute++) {
+      offset += (size_t)snprintf(source + offset, sizeof(source) - offset, "a%zu='v' ", attribute);
+    }
+    offset += (size_t)snprintf(source + offset, sizeof(source) - offset, "/>");
+  }
+  memcpy(source + offset, "</r>", 5);
+  if (check_failures(source))
+    return 4;
+#endif
 
   /* retained CDATA fills another token page in preserve mode. */
   memcpy(source, "<r>", 3);

@@ -84,6 +84,7 @@ xml__parse(const char        * __restrict contents,
 #if defined(XML__PARSE_CHECKED)
   const char  *checkedStart;
   size_t       invalidOffset;
+  xml_parse_status_t attributeStatus;
 #endif
 
   uint32_t     remaining;
@@ -343,6 +344,15 @@ xml__parse(const char        * __restrict contents,
 #if defined(XML__PARSE_CHECKED)
         if (pos != begintag && xml__parse_char(p, limit, 1) != '>')
           goto err;
+        if (pos == beginattr) {
+          attributeStatus = (xml_parse_status_t)xml__parse_check_attributes(obj, budget, &checkedStart);
+          if (attributeStatus != XML_PARSE_OK) {
+            status = attributeStatus;
+            if (checkedStart)
+              p = (char *)checkedStart;
+            goto err;
+          }
+        }
 #endif
         switch (pos) {
           case begintag:
@@ -413,6 +423,17 @@ xml__parse(const char        * __restrict contents,
 
         break;
       case '>':
+#if defined(XML__PARSE_CHECKED)
+        if (pos == beginattr) {
+          attributeStatus = (xml_parse_status_t)xml__parse_check_attributes(obj, budget, &checkedStart);
+          if (attributeStatus != XML_PARSE_OK) {
+            status = attributeStatus;
+            if (checkedStart)
+              p = (char *)checkedStart;
+            goto err;
+          }
+        }
+#endif
         if (pos == endtag) {
           /* switch parent back */
           if (!parent)

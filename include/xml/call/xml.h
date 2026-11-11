@@ -67,8 +67,13 @@ xmlc_parse_span_limited(const char               * __restrict contents,
  * a leading UTF-8 BOM is accepted and offsets include it.
  *
  * comments/PI remain skipped, values retain raw spelling and no entities are
- * decoded into the tree. duplicate attributes, namespace bindings and full
- * XML declaration/PI/document grammar remain separate. DTDs are unsupported.
+ * decoded into the tree. repeated attribute names are rejected at the second
+ * source occurrence. lists through 32 attributes use fixed stack storage.
+ * larger lists temporarily allocate one pointer per attribute, counted
+ * against the remaining memory cap. the buffer is released before parsing
+ * content or reporting an error. token order and retained memory are preserved.
+ * namespace bindings, expanded-name duplicates and full XML
+ * declaration/PI/document grammar remain separate. DTDs are unsupported.
  * failures return no document and report the offending source byte. limit
  * and allocation behavior follows xmlc_parse_span_limited. this compiled
  * entry reuses the parser state machine and existing lexical validators.
